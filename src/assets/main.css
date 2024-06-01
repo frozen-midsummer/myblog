@@ -1,0 +1,37 @@
+@import './base.css';
+
+#app {
+  max-width: 1280px;
+  /* margin: 0 auto; */
+  padding: 2rem;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: rgb(0, 142, 189);
+  /* 元素在不同状态之间切换时候的过渡效果 */
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+/* 页面宽度小于此大小触发以下样式 */
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: start;
+  }
+
+  #app {
+    display: grid;
+    /* 不开启分页 */
+    grid-template-columns: 1fr;
+    padding: 0 2rem;
+  }
+}
