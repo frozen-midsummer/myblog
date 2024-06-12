@@ -21,6 +21,7 @@ a,
     background-color: hsla(160, 100%, 37%, 0.2);
   }
 }
+
 /* 页面宽度小于此大小触发以下样式 */
 @media (min-width: 1024px) {
   body {

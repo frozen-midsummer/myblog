@@ -5,11 +5,8 @@ import HelloWorld from './components/HelloWorld.vue'
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
     <div class="wrapper">
-      <HelloWorld msg="<h1>Patience is key in life</h1>" />
-
+      <!-- <HelloWorld msg="<h1>Patience is key in life</h1>" /> -->
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/notes">Notes</RouterLink>
@@ -36,10 +33,10 @@ header {
 }
 
 nav {
-  width: 100%;
-  font-size: 12px;
+  /* width: 100%; */
+  font-size: 2rem;
   text-align: center;
-  margin-top: 2rem;
+  /* margin-top: 2rem; */
 }
 
 nav a.router-link-exact-active {
@@ -83,7 +80,7 @@ nav a:first-of-type {
     font-size: 1rem;
 
     padding: 1rem 0;
-    margin-top: 1rem;
+    /* margin-top: 1rem; */
   }
 }
 </style>
