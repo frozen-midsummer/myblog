@@ -86,7 +86,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-html:before {
+/* html:before {
   background-image: url(./imgs/waterloo-bridge-london-1.png);
   position: absolute;
   content: "";
@@ -98,4 +98,4 @@ html:before {
   bottom: 0;
   left: 0;
   opacity: 0.5;
-}
+} */

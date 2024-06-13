@@ -1,34 +1,39 @@
 <template>
-  <el-checkbox class="todolist" v-model="checkAll" :indeterminate="isIndeterminate" @change="handleCheckAllChange">
-    Check all
-  </el-checkbox>
-  <el-checkbox-group v-model="checkedCities" @change="handleCheckedCitiesChange">
-    <el-checkbox class="todolist" v-for="city in cities" :key="city" :label="city" :value="city">
-      {{ city }}
-    </el-checkbox>
-  </el-checkbox-group>
+  <el-table-v2 :columns="columns" :data="data" :width="700" :height="400" fixed />
 </template>
 
-<script setup>
-import { ref } from "vue";
+<script lang="ts" setup>
+const generateColumns = (length = 10, prefix = 'column-', props?: any) =>
+  Array.from({ length }).map((_, columnIndex) => ({
+    ...props,
+    key: `${prefix}${columnIndex}`,
+    dataKey: `${prefix}${columnIndex}`,
+    title: `Column ${columnIndex}`,
+    width: 150,
+  }))
+const generateData = (
+  columns: ReturnType<typeof generateColumns>,
+  length = 200,
+  prefix = 'row-'
+) =>
+  Array.from({ length }).map((_, rowIndex) => {
+    return columns.reduce(
+      (rowData, column, columnIndex) => {
+        rowData[column.dataKey] = `Row ${rowIndex} - Col ${columnIndex}`
+        return rowData
+      },
+      {
+        id: `${prefix}${rowIndex}`,
+        parentId: null,
+      }
+    )
+  })
 
-const checkAll = ref(false);
-const isIndeterminate = ref(true);
-const checkedCities = ref(["Shanghai", "Beijing"]);
-const cities = ["Shanghai", "Beijing", "Guangzhou", "Shenzhen"];
-
-const handleCheckAllChange = (val) => {
-  checkedCities.value = val ? cities : [];
-  isIndeterminate.value = false;
-};
-const handleCheckedCitiesChange = (value) => {
-  const checkedCount = value.length;
-  checkAll.value = checkedCount === cities.length;
-  isIndeterminate.value = checkedCount > 0 && checkedCount < cities.length;
-};
+const columns = generateColumns(10)
+const data = generateData(columns, 200)
 </script>
 
-<style>
+<style scoped>
 .todolist {
   display: flex;
   place-items: start;

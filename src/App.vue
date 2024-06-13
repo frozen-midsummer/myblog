@@ -1,6 +1,5 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
@@ -21,9 +20,11 @@ import HelloWorld from './components/HelloWorld.vue'
 </template>
 
 <style scoped>
+/* 手机端样式 */
 header {
   line-height: 1.5;
   max-height: 100vh;
+  min-height: 20vh;
 }
 
 .logo {
@@ -38,11 +39,11 @@ nav {
   text-align: center;
   /* margin-top: 2rem; */
 }
-
+/* 超链接激活状态颜色 */
 nav a.router-link-exact-active {
   color: var(--color-text);
 }
-
+/* 鼠标悬停超链接 */
 nav a.router-link-exact-active:hover {
   background-color: transparent;
 }
@@ -56,12 +57,12 @@ nav a {
 nav a:first-of-type {
   border: 0;
 }
-
+/* 电脑端样式 */
 @media (min-width: 1024px) {
   header {
     display: flex;
     place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+    /* padding-right: calc(var(--section-gap) / 2); */
   }
 
   .logo {
@@ -75,9 +76,9 @@ nav a:first-of-type {
   }
 
   nav {
+    /*导航条靠左*/
     text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
+    font-size: 2rem;
 
     padding: 1rem 0;
     /* margin-top: 1rem; */
