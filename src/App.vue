@@ -1,22 +1,24 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView } from "vue-router";
 </script>
 
 <template>
-  <header>
-    <div class="wrapper">
-      <!-- <HelloWorld msg="<h1>Patience is key in life</h1>" /> -->
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/notes">Notes</RouterLink>
-        <RouterLink to="/todos">Todos</RouterLink>
-        <RouterLink to="/nav1">nav1</RouterLink>
-        <RouterLink to="/nav2">nav2</RouterLink>
-      </nav>
-    </div>
-  </header>
+  <div class="whole dark-scheme">
+    <header>
+      <div class="wrapper">
+        <!-- <HelloWorld msg="<h1>Patience is key in life</h1>" /> -->
+        <nav>
+          <RouterLink to="/">Home</RouterLink>
+          <RouterLink to="/notes">Notes</RouterLink>
+          <RouterLink to="/todos">Todos</RouterLink>
+          <RouterLink to="/nav1">nav1</RouterLink>
+          <RouterLink to="/nav2">nav2</RouterLink>
+        </nav>
+      </div>
+    </header>
 
-  <RouterView />
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>

@@ -35,7 +35,7 @@
 
   --section-gap: 160px;
 }
-
+/* 侦测操作系统主题色 */
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: var(--vt-c-black);
@@ -86,7 +86,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* html:before {
+body::before {
   background-image: url(./imgs/waterloo-bridge-london-1.png);
   position: absolute;
   content: "";
@@ -98,4 +98,5 @@ body {
   bottom: 0;
   left: 0;
   opacity: 0.5;
-} */
+  z-index: -1;
+}

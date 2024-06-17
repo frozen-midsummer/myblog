@@ -1,8 +1,9 @@
 @import './base.css';
 
 #app {
-  max-width: 1280px;
+  /* max-width: 1280px; */
   /* margin: 0 auto; */
+  width: 100%;
   padding: 2rem;
   font-weight: normal;
 }
@@ -10,7 +11,7 @@
 a,
 .green {
   text-decoration: none;
-  color: rgb(0, 142, 189);
+  color: rgb(71, 0, 36);
   /* 元素在不同状态之间切换时候的过渡效果 */
   transition: 0.4s;
   padding: 3px;
@@ -18,7 +19,8 @@ a,
 
 @media (hover: hover) {
   a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+    /* 普鲁士蓝 */
+    background-color: rgb(86, 113, 143);
   }
 }
 
