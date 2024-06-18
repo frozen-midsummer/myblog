@@ -37,7 +37,7 @@ header {
 
 nav {
   /* width: 100%; */
-  font-size: 2rem;
+  font-size: 1.5rem;
   text-align: center;
   /* margin-top: 2rem; */
 }
@@ -80,7 +80,7 @@ nav a:first-of-type {
   nav {
     /*导航条靠左*/
     text-align: left;
-    font-size: 2rem;
+    font-size: 1.5rem;
 
     padding: 1rem 0;
     /* margin-top: 1rem; */

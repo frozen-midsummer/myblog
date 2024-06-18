@@ -1,6 +1,6 @@
 <template>
   <div class="table-wrapper">
-    <el-table :columns="columns" :data="data" :width="700" :height="400" fixed>
+    <el-table :data="data" :width="700" :height="400" fixed>
       <el-table-column prop="createdTime" label="Created Time" width="120" />
       <el-table-column prop="updatedTime" label="Updated Time" width="120" />
       <el-table-column prop="deadline" label="Deadline" width="120" />
@@ -19,7 +19,7 @@ export default {
           createdTime: "2024",
           updatedTime: "2024",
           deadline: "2024",
-          description: "抢票",
+          description: "抢票抢票抢票抢票抢票抢票抢票抢票",
           alarm: "never",
         },
       ],

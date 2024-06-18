@@ -4,7 +4,7 @@
   /* max-width: 1280px; */
   /* margin: 0 auto; */
   width: 100%;
-  padding: 2rem;
+  padding: 1rem;
   font-weight: normal;
 }
 
@@ -35,6 +35,6 @@ a,
     display: grid;
     /* 不开启分页 */
     grid-template-columns: 1fr;
-    padding: 0 2rem;
+    padding: 0 1rem;
   }
 }
