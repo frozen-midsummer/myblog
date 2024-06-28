@@ -34,7 +34,7 @@ export default {
         .then(() => {
           // 登录成功后的处理，比如跳转页面
           if (this.$store.getters.isLoggedIn) {
-            this.$router.push("/todos");
+            this.$router.push("/home");
           }
         })
         .catch((error) => {
