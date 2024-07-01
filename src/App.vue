@@ -3,7 +3,7 @@ import { RouterLink, RouterView } from "vue-router";
 </script>
 
 <template>
-  <div class="whole dark-scheme">
+  <div class="whole">
     <header>
       <div class="wrapper">
         <!-- <HelloWorld msg="<h1>Patience is key in life</h1>" /> -->
