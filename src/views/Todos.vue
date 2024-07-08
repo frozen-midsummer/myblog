@@ -1,42 +1,87 @@
 <template>
-  <el-table-v2 :columns="columns" :data="data" :width="700" :height="400" fixed />
+  <div class="table-wrapper">
+    <el-table :data="data" :height="400" fixed>
+      <el-table-column
+        prop="createdTime"
+        label="Created Time"
+        :width="columWidth"
+      />
+      <el-table-column
+        prop="updatedTime"
+        label="Updated Time"
+        :width="columWidth"
+      />
+      <el-table-column prop="deadline" label="Deadline" :width="columWidth" />
+      <el-table-column
+        prop="description"
+        label="Description"
+        :width="columWidth"
+      />
+      <el-table-column prop="alarm" label="Notification" :width="columWidth" />
+      <el-table-column fixed="right" label="Operations" :width="columWidth">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click.prevent="deleteRow(scope.$index)"
+          >
+            Remove
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
 </template>
 
-<script lang="ts" setup>
-const generateColumns = (length = 10, prefix = 'column-', props?: any) =>
-  Array.from({ length }).map((_, columnIndex) => ({
-    ...props,
-    key: `${prefix}${columnIndex}`,
-    dataKey: `${prefix}${columnIndex}`,
-    title: `Column ${columnIndex}`,
-    width: 150,
-  }))
-const generateData = (
-  columns: ReturnType<typeof generateColumns>,
-  length = 200,
-  prefix = 'row-'
-) =>
-  Array.from({ length }).map((_, rowIndex) => {
-    return columns.reduce(
-      (rowData, column, columnIndex) => {
-        rowData[column.dataKey] = `Row ${rowIndex} - Col ${columnIndex}`
-        return rowData
-      },
-      {
-        id: `${prefix}${rowIndex}`,
-        parentId: null,
-      }
-    )
-  })
-
-const columns = generateColumns(10)
-const data = generateData(columns, 200)
+<script>
+import { ref } from "vue";
+export default {
+  setup() {
+    const columWidth = ref(120);
+    return {
+      columWidth,
+    };
+  },
+  data() {
+    return {
+      data: [
+        {
+          createdTime: "2024-07-01",
+          updatedTime: "2024-07-01",
+          deadline: "2024-07-01",
+          description: "st.",
+          alarm: "never",
+        },
+      ],
+    };
+  },
+  methods: {
+    deleteRow(index) {
+      this.data.splice(index, 1);
+    },
+  },
+};
 </script>
 
-<style scoped>
-.todolist {
-  display: flex;
-  place-items: start;
+<style lang="css" scoped>
+.table-wrapper :deep(.el-table--fit) {
+  padding: 5px 0px 0px 0px;
+}
+.table-wrapper :deep(.el-table),
+.el-table__expanded-cell {
+  background-color: transparent;
+  --el-table-border-color: black;
+  --el-table-header-text-color: rgb(0, 142, 189);
+  /* max-width: 1024px; */
+}
+
+.table-wrapper :deep(.el-table tr) {
+  background-color: transparent !important;
+}
+
+.table-wrapper :deep(.el-table th) {
+  background-color: transparent !important;
 }
 
 @media (min-width: 1024px) {
@@ -44,6 +89,9 @@ const data = generateData(columns, 200)
     /* min-height: 100vh; */
     display: flex;
     align-items: center;
+  }
+  .el-table-column {
+    width: "200px";
   }
 }
 </style>

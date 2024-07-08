@@ -1,22 +1,24 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView } from "vue-router";
 </script>
 
 <template>
-  <header>
-    <div class="wrapper">
-      <!-- <HelloWorld msg="<h1>Patience is key in life</h1>" /> -->
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/notes">Notes</RouterLink>
-        <RouterLink to="/todos">Todos</RouterLink>
-        <RouterLink to="/nav1">nav1</RouterLink>
-        <RouterLink to="/nav2">nav2</RouterLink>
-      </nav>
-    </div>
-  </header>
+  <div class="whole">
+    <header>
+      <div class="wrapper">
+        <!-- <HelloWorld msg="<h1>Patience is key in life</h1>" /> -->
+        <nav>
+          <RouterLink to="/home">Home</RouterLink>
+          <RouterLink to="/notes">Notes</RouterLink>
+          <RouterLink to="/todos">Todos</RouterLink>
+          <RouterLink to="/nav1">nav1</RouterLink>
+          <RouterLink to="/nav2">nav2</RouterLink>
+        </nav>
+      </div>
+    </header>
 
-  <RouterView />
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>
@@ -35,7 +37,7 @@ header {
 
 nav {
   /* width: 100%; */
-  font-size: 2rem;
+  font-size: 1.5rem;
   text-align: center;
   /* margin-top: 2rem; */
 }
@@ -78,7 +80,7 @@ nav a:first-of-type {
   nav {
     /*导航条靠左*/
     text-align: left;
-    font-size: 2rem;
+    font-size: 1.5rem;
 
     padding: 1rem 0;
     /* margin-top: 1rem; */
