@@ -1,12 +1,24 @@
 <template>
   <div class="table-wrapper">
     <el-table :data="data" :height="400" fixed>
-      <el-table-column prop="createdTime" label="Created Time" width="120" />
-      <el-table-column prop="updatedTime" label="Updated Time" width="120" />
-      <el-table-column prop="deadline" label="Deadline" width="120" />
-      <el-table-column prop="description" label="Description" width="120" />
-      <el-table-column prop="alarm" label="Notification" width="120" />
-      <el-table-column fixed="right" label="Operations" width="120">
+      <el-table-column
+        prop="createdTime"
+        label="Created Time"
+        :width="columWidth"
+      />
+      <el-table-column
+        prop="updatedTime"
+        label="Updated Time"
+        :width="columWidth"
+      />
+      <el-table-column prop="deadline" label="Deadline" :width="columWidth" />
+      <el-table-column
+        prop="description"
+        label="Description"
+        :width="columWidth"
+      />
+      <el-table-column prop="alarm" label="Notification" :width="columWidth" />
+      <el-table-column fixed="right" label="Operations" :width="columWidth">
         <template #default="scope">
           <el-button
             link
@@ -23,7 +35,14 @@
 </template>
 
 <script>
+import { ref } from "vue";
 export default {
+  setup() {
+    const columWidth = ref(120);
+    return {
+      columWidth,
+    };
+  },
   data() {
     return {
       data: [
@@ -31,7 +50,7 @@ export default {
           createdTime: "2024-07-01",
           updatedTime: "2024-07-01",
           deadline: "2024-07-01",
-          description: "抢票抢票抢票抢票抢票抢票抢票抢票",
+          description: "st.",
           alarm: "never",
         },
       ],
@@ -54,7 +73,7 @@ export default {
   background-color: transparent;
   --el-table-border-color: black;
   --el-table-header-text-color: rgb(0, 142, 189);
-  max-width: 1024px;
+  /* max-width: 1024px; */
 }
 
 .table-wrapper :deep(.el-table tr) {
@@ -70,6 +89,9 @@ export default {
     /* min-height: 100vh; */
     display: flex;
     align-items: center;
+  }
+  .el-table-column {
+    width: "200px";
   }
 }
 </style>
