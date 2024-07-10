@@ -1,6 +1,7 @@
 <template>
   <div class="table-wrapper">
-    <el-table :data="data" :height="400" fixed>
+    <el-button @click="refreshData">刷新数据</el-button>
+    <el-table :data="todosData" :height="400" fixed>
       <el-table-column
         prop="createdTime"
         label="Created Time"
@@ -15,10 +16,10 @@
       <el-table-column
         prop="description"
         label="Description"
-        :width="columWidth"
+        :width="200"
       />
       <el-table-column prop="alarm" label="Notification" :width="columWidth" />
-      <el-table-column fixed="right" label="Operations" :width="columWidth">
+      <el-table-column label="Operations" :width="columWidth">
         <template #default="scope">
           <el-button
             link
@@ -35,7 +36,8 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted, onUpdated } from "vue";
+import axios from "axios";
 export default {
   setup() {
     const columWidth = ref(120);
@@ -45,7 +47,7 @@ export default {
   },
   data() {
     return {
-      data: [
+      todosData: [
         {
           createdTime: "2024-07-01",
           updatedTime: "2024-07-01",
@@ -58,7 +60,25 @@ export default {
   },
   methods: {
     deleteRow(index) {
-      this.data.splice(index, 1);
+      this.todosData.splice(index, 1);
+    },
+    refreshData() {
+      axios
+        .post(
+          "http://10.188.133.100:8080/userdata/tasks",
+          {},
+          {
+            headers: {
+              Authorization: "Bearer " + this.$store.getters.getToken,
+            },
+          }
+        )
+        .then((response) => {
+          this.todosData = response.data;
+        })
+        .catch((error) => {
+          console.error("请求失败:", error);
+        });
     },
   },
 };
@@ -89,9 +109,6 @@ export default {
     /* min-height: 100vh; */
     display: flex;
     align-items: center;
-  }
-  .el-table-column {
-    width: "200px";
   }
 }
 </style>
