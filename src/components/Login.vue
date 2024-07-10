@@ -1,6 +1,12 @@
 <template>
   <div class="login-container">
-    <el-form :model="loginForm" status-icon ref="loginForm" label-width="80px" @keyup.enter="handleLogin">
+    <el-form
+      :model="loginForm"
+      status-icon
+      ref="loginForm"
+      label-width="80px"
+      @keyup.enter="handleLogin"
+    >
       <el-form-item label="用户名">
         <el-input v-model="loginForm.username"></el-input>
       </el-form-item>
