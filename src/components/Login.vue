@@ -1,6 +1,12 @@
 <template>
   <div class="login-container">
-    <el-form :model="loginForm" status-icon ref="loginForm" label-width="80px">
+    <el-form
+      :model="loginForm"
+      status-icon
+      ref="loginForm"
+      label-width="80px"
+      @keyup.enter="handleLogin"
+    >
       <el-form-item label="用户名">
         <el-input v-model="loginForm.username"></el-input>
       </el-form-item>
@@ -34,7 +40,7 @@ export default {
         .then(() => {
           // 登录成功后的处理，比如跳转页面
           if (this.$store.getters.isLoggedIn) {
-            this.$router.push("/todos");
+            this.$router.push("/home");
           }
         })
         .catch((error) => {

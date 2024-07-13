@@ -5,9 +5,10 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/",
+      path: "/home",
       name: "home",
       component: HomeView,
+      meta: { requiresAuth: true },
     },
     {
       path: "/login",
@@ -26,7 +27,6 @@ const router = createRouter({
       path: "/todos",
       name: "todos",
       component: () => import("../views/Todos.vue"),
-      meta: { requiresAuth: true },
     },
   ],
 });

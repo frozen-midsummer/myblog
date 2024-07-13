@@ -3,12 +3,12 @@ import { RouterLink, RouterView } from "vue-router";
 </script>
 
 <template>
-  <div class="whole dark-scheme">
+  <div class="whole">
     <header>
       <div class="wrapper">
         <!-- <HelloWorld msg="<h1>Patience is key in life</h1>" /> -->
         <nav>
-          <RouterLink to="/">Home</RouterLink>
+          <RouterLink to="/home">Home</RouterLink>
           <RouterLink to="/notes">Notes</RouterLink>
           <RouterLink to="/todos">Todos</RouterLink>
           <RouterLink to="/nav1">nav1</RouterLink>
