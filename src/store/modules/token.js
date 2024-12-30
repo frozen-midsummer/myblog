@@ -3,7 +3,6 @@ import { login } from "@/api/backend";
 const state = () => ({
   token: null,
   username: null,
-  theme: "light",
 });
 const mutations = {
   SET_TOKEN(state, token) {
@@ -11,9 +10,6 @@ const mutations = {
   },
   SET_USERNAME(state, username) {
     state.username = username;
-  },
-  SET_THEME(state, theme) {
-    state.theme = theme;
   },
 };
 const actions = {
@@ -50,48 +46,10 @@ const actions = {
       commit("SET_USERNAME", username);
     }
   },
-  toggleTheme({ commit, state }) {
-    const newTheme = state.theme === "light" ? "dark" : "light";
-    commit("SET_THEME", newTheme);
-    localStorage.setItem("userTheme", newTheme);
-
-    // 在 'dark' 和 'light' 类之间切换
-    if (newTheme === "dark") {
-      document.documentElement.classList.remove("light");
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.classList.add("light");
-    }
-  },
-  initializeTheme({ commit }) {
-    const savedTheme = localStorage.getItem("userTheme");
-    if (savedTheme) {
-      commit("SET_THEME", savedTheme);
-      if (savedTheme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.add("light");
-      }
-    } else {
-      // 如果没有保存的主题，则根据操作系统主题偏好初始化
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-      commit("SET_THEME", systemTheme);
-      if (systemTheme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.add("light");
-      }
-    }
-  },
 };
 const getters = {
   isLoggedIn: (state) => !!state.token,
   getToken: (state) => state.token,
-  currentTheme: (state) => state.theme,
   username: (state) => state.username,
 };
 export default { state, getters, mutations, actions };

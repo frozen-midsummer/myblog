@@ -11,7 +11,7 @@
 a,
 .green {
   text-decoration: none;
-  color: rgb(71, 0, 36);
+  /* color: rgb(71, 0, 36); */
   /* 元素在不同状态之间切换时候的过渡效果 */
   transition: 0.4s;
   padding: 3px;

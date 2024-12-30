@@ -27,6 +27,10 @@ const handleLogin = async () => {
   }
 };
 
+const handleRegister = async () => {
+  router.push("/register");
+};
+
 // 页面加载时初始化登录状态
 onMounted(() => {
   store.dispatch("theme/initLoginState");
@@ -43,7 +47,8 @@ onMounted(() => {
         <el-input type="password" v-model="loginForm.password"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleLogin">登录</el-button>
+        <el-button @click="handleLogin">登录</el-button>
+        <el-button @click="handleRegister">注册</el-button>
       </el-form-item>
     </el-form>
   </div>

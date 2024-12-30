@@ -2,9 +2,11 @@
 import { ref, onMounted, onUpdated, computed } from "vue";
 import { RouterLink, RouterView } from "vue-router";
 import { useStore } from "vuex";
+import { Sunny, Moon } from '@element-plus/icons-vue'
+import LightSwitchIcon from '@/components/icons/IconLightSwitch.vue'
 const store = useStore();
-// 计算属性：获取当前主题
-const currentTheme = computed(() => store.state.theme);
+//获取当前主题
+const currTheme = ref(store.getters["theme/currentTheme"] === "dark")
 // 方法：切换主题
 const toggleTheme = () => {
   store.dispatch('theme/toggleTheme');
@@ -15,20 +17,28 @@ onMounted(() => {
 </script>
 
 <template>
-  <div :class="currentTheme">
-    <header>
-      <div class="wrapper">
+  <div class="common-layout">
+    <el-container>
+      <el-header>
         <nav>
           <RouterLink to="/home">Home</RouterLink>
           <RouterLink to="/todos">Todos</RouterLink>
           <RouterLink to="/nav1">nav1</RouterLink>
           <RouterLink to="/nav2">nav2</RouterLink>
-          <button @click="toggleTheme">切换主题</button>
+          <div style="display:inline-block;width:15px"></div>
+          <el-switch v-model="currTheme" :active-action-icon="Moon" :inactive-action-icon="Sunny" @Change="toggleTheme">
+            <template #inactive-action>
+              <el-icon color="#606266" class="no-inherit">
+                <Sunny />
+              </el-icon>
+            </template>
+          </el-switch>
         </nav>
-      </div>
-    </header>
-
-    <RouterView />
+      </el-header>
+      <el-main>
+        <RouterView />
+      </el-main>
+    </el-container>
   </div>
 </template>
 
@@ -94,7 +104,7 @@ nav a:first-of-type {
     flex-wrap: wrap;
   }
 
-  nav { 
+  nav {
     /*导航条靠左*/
     text-align: left;
     font-size: 1.5rem;

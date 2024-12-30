@@ -12,6 +12,6 @@ function loginOut() {
 <template>
   <div>
     <div>Welcome, {{ store.getters["theme/username"] }}</div>
-    <el-button type="primary" @click="loginOut">登出</el-button>
+    <el-button @click="loginOut">登出</el-button>
   </div>
 </template>

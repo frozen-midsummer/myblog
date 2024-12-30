@@ -67,7 +67,6 @@ onMounted(() => {
   background-color: transparent;
   --el-table-border-color: black;
   --el-table-header-text-color: rgb(0, 142, 189);
-  /* max-width: 1024px; */
 }
 
 .table-wrapper :deep(.el-table tr) {
