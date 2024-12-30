@@ -10,11 +10,13 @@
     "test:unit": "vitest"
   },
   "dependencies": {
+    "antd": "^5.22.7",
     "axios": "^1.7.2",
     "element-plus": "^2.7.4",
+    "qs": "^6.13.1",
+    "react": "^19.0.0",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "vuex": "^4.1.0"
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
@@ -25,6 +27,7 @@
     "unplugin-vue-components": "^0.27.0",
     "vite": "^5.2.8",
     "vite-plugin-vue-devtools": "^7.0.25",
-    "vitest": "^1.4.0"
+    "vitest": "^1.4.0",
+    "vuex": "^4.1.0"
   }
 }

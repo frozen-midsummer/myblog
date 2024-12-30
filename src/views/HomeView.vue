@@ -9,9 +9,6 @@ export default {
       this.$router.push('/login');
     },
   },
-  beforeCreate() {
-    this.$store.dispatch("initLoginState");
-  },
 };
 </script>
 

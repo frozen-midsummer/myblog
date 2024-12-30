@@ -1,0 +1,8 @@
+@font-face {
+    font-family: iconfont-myblog-pingfangsc;
+    src: url(./PingFangSC-Regular.woff2)format('woff2');
+}
+
+.iconfont-myblog-pingfangsc {
+    font-family: iconfont-myblog-pingfangsc !important;
+}
