@@ -35,17 +35,15 @@ router.beforeEach(async (to, from, next) => {
   // 检查是否需要认证以及用户是否已登录
   const isUserLoggedIn =
     localStorage.getItem("token") && localStorage.getItem("username");
-
   if (requiresAuth && !isUserLoggedIn) {
     // 如果需要认证且用户未登录，则重定向到登录页面
-    return next({ path: "/login" });
+    next({ path: "/login", query: { redirect: to.fullPath } });
   } else if (requiresAuth && isUserLoggedIn) {
     try {
       // 验证令牌
       const response = await validateToken({
         username: localStorage.getItem("username"),
       });
-
       if (response.errorNo === 0) {
         // 如果令牌验证成功，则允许继续导航
         next();

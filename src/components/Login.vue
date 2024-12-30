@@ -1,12 +1,41 @@
+<script setup>
+import { ref, reactive, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import { ElMessage } from 'element-plus';
+
+const store = useStore();
+const router = useRouter();
+
+// 定义表单数据
+const loginForm = reactive({
+  username: '',
+  password: '',
+});
+
+// 登录处理函数
+const handleLogin = async () => {
+  try {
+    await store.dispatch("theme/login", loginForm);
+
+    if (store.getters["theme/isLoggedIn"]) {
+      router.push("/home");
+    }
+  } catch (error) {
+    console.error("登录失败:", error.message);
+    ElMessage.error("登录失败，请重试");
+  }
+};
+
+// 页面加载时初始化登录状态
+onMounted(() => {
+  store.dispatch("theme/initLoginState");
+});
+</script>
+
 <template>
   <div class="login-container">
-    <el-form
-      :model="loginForm"
-      status-icon
-      ref="loginForm"
-      label-width="80px"
-      @keyup.enter="handleLogin"
-    >
+    <el-form :model="loginForm" status-icon label-width="auto" @keyup.enter="handleLogin">
       <el-form-item label="用户名">
         <el-input v-model="loginForm.username"></el-input>
       </el-form-item>
@@ -19,43 +48,6 @@
     </el-form>
   </div>
 </template>
-
-<script>
-export default {
-  data() {
-    return {
-      loginForm: {
-        username: "",
-        password: "",
-      },
-    };
-  },
-  methods: {
-    handleLogin() {
-      // 假设这是从表单获取的用户名和密码
-      const { username, password } = this.loginForm;
-      // 调用Vuex的action进行登录
-      this.$store
-        .dispatch("login", { username, password })
-        .then(() => {
-          // 登录成功后的处理，比如跳转页面
-          if (this.$store.getters.isLoggedIn) {
-            this.$router.push("/home");
-          }
-        })
-        .catch((error) => {
-          console.error("登录失败:", error.message);
-          // 显示错误信息
-          this.$message.error("登录失败，请重试");
-        });
-    },
-  },
-  mounted() {
-    // 页面加载时初始化登录状态
-    this.$store.dispatch("initLoginState");
-  },
-};
-</script>
 
 <style scoped>
 .login-container {

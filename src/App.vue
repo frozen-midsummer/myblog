@@ -7,10 +7,10 @@ const store = useStore();
 const currentTheme = computed(() => store.state.theme);
 // 方法：切换主题
 const toggleTheme = () => {
-  store.dispatch('toggleTheme');
+  store.dispatch('theme/toggleTheme');
 };
 onMounted(() => {
-  store.dispatch("initLoginState");
+  store.dispatch("theme/initLoginState");
 })
 </script>
 

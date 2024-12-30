@@ -1,23 +1,3 @@
-<template>
-  <div class="table-wrapper">
-    <el-button @click="refreshData">刷新数据</el-button>
-    <el-table :data="todosData" :height="400" fixed>
-      <el-table-column prop="createdTime" label="Created Time" :width="columWidth" />
-      <el-table-column prop="updatedTime" label="Updated Time" :width="columWidth" />
-      <el-table-column prop="deadline" label="Deadline" :width="columWidth" />
-      <el-table-column prop="description" label="Description" :width="200" />
-      <el-table-column prop="alarm" label="Notification" :width="columWidth" />
-      <el-table-column label="Operations" :width="columWidth">
-        <template #default="scope">
-          <el-button link type="primary" size="small" @click.prevent="deleteRow(scope.$index)">
-            Remove
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted, onUpdated } from "vue";
 import { useStore } from 'vuex';
@@ -36,7 +16,7 @@ function refreshData() {
       {},
       {
         headers: {
-          Authorization: "Bearer " + store.getters.getToken,
+          Authorization: "Bearer " + store.getters["theme/getToken"],
         },
       }
     )
@@ -56,6 +36,26 @@ onMounted(() => {
   refreshData();
 })
 </script>
+
+<template>
+  <div class="table-wrapper">
+    <el-button @click="refreshData">刷新数据</el-button>
+    <el-table :data="todosData" :height="400" fixed>
+      <el-table-column prop="createdTime" label="Created Time" :width="columWidth" />
+      <el-table-column prop="updatedTime" label="Updated Time" :width="columWidth" />
+      <el-table-column prop="deadline" label="Deadline" :width="columWidth" />
+      <el-table-column prop="description" label="Description" :width="200" />
+      <el-table-column prop="alarm" label="Notification" :width="columWidth" />
+      <el-table-column label="Operations" :width="columWidth">
+        <template #default="scope">
+          <el-button link type="primary" size="small" @click.prevent="deleteRow(scope.$index)">
+            Remove
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+</template>
 
 <style lang="css" scoped>
 .table-wrapper :deep(.el-table--fit) {
