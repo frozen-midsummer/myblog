@@ -55,9 +55,9 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   (config) => {
-    if (store.getters["theme/getToken"]) {
+    if (store.getters["token/getToken"]) {
       config.headers.Authorization =
-        "Bearer " + store.getters["theme/getToken"];
+        "Bearer " + store.getters["token/getToken"];
     }
     //这里会过滤所有为空、0、false的key，如果不需要请自行注释
     // if (config.data)

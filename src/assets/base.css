@@ -20,8 +20,14 @@
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
-  --vt-c-background-opacity-light: 0.5;
-  --vt-c-background-opacity-dark: 0.2;
+  --vt-c-background-opacity-light: 0.4;
+  --vt-c-background-opacity-dark: 0.15;
+
+  --el-table-border-color-light: var(--vt-c-black-soft);
+  --el-table-border-color-dark: var(--vt-c-white-soft);
+
+  --el-table-header-text-color-light: #2c3e50;
+  --el-table-header-text-color-dark: #ff0080;
 }
 
 /* semantic color variables for this project */
@@ -37,6 +43,9 @@
   --color-text: var(--vt-c-text-light-1);
 
   --background-opacity: var(--vt-c-background-opacity-light);
+  --el-table-border-color1: var(--el-table-border-color-light);
+  --el-table-header-text-color1: var(--el-table-header-text-color-light);
+
   --section-gap: 160px;
 }
 
@@ -67,7 +76,9 @@
   --color-heading: var(--vt-c-text-dark-1);
   --color-text: var(--vt-c-text-dark-2);
 
-  --background-opacity: var(--vt-c-background-opacity-dark)
+  --background-opacity: var(--vt-c-background-opacity-dark);
+  --el-table-border-color1: var(--el-table-border-color-dark);
+  --el-table-header-text-color1: var(--el-table-header-text-color-dark);
 }
 
 *,
@@ -119,4 +130,24 @@ body::before {
   left: 0;
   opacity: var(--background-opacity);
   z-index: -1;
+}
+
+/* element plus variables */
+:root .el-table {
+  background-color: transparent;
+  --el-table-border-color: var(--el-table-border-color1);
+  --el-table-header-text-color: var(--el-table-header-text-color1);
+}
+
+/* 使element plus 表格透明化 */
+:root .el-table tr {
+  background-color: transparent;
+}
+
+:root .el-table th.el-table__cell {
+  background-color: transparent;
+}
+
+:root .el-table--fit {
+  padding: 1px 0px 0px 0px;
 }

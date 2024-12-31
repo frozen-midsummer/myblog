@@ -16,9 +16,9 @@ const loginForm = reactive({
 // 登录处理函数
 const handleLogin = async () => {
   try {
-    await store.dispatch("theme/login", loginForm);
+    await store.dispatch("token/login", loginForm);
 
-    if (store.getters["theme/isLoggedIn"]) {
+    if (store.getters["token/isLoggedIn"]) {
       router.push("/home");
     }
   } catch (error) {
@@ -33,7 +33,7 @@ const handleRegister = async () => {
 
 // 页面加载时初始化登录状态
 onMounted(() => {
-  store.dispatch("theme/initLoginState");
+  store.dispatch("token/initLoginState");
 });
 </script>
 

@@ -12,28 +12,32 @@ const toggleTheme = () => {
   store.dispatch('theme/toggleTheme');
 };
 onMounted(() => {
-  store.dispatch("theme/initLoginState");
+  //应用挂载时初始化登录信息
+  store.dispatch("token/initLoginState");
 })
 </script>
 
 <template>
-  <div class="common-layout">
+  <div>
     <el-container>
       <el-header>
-        <nav>
-          <RouterLink to="/home">Home</RouterLink>
-          <RouterLink to="/todos">Todos</RouterLink>
-          <RouterLink to="/nav1">nav1</RouterLink>
-          <RouterLink to="/nav2">nav2</RouterLink>
-          <div style="display:inline-block;width:15px"></div>
-          <el-switch v-model="currTheme" :active-action-icon="Moon" :inactive-action-icon="Sunny" @Change="toggleTheme">
-            <template #inactive-action>
-              <el-icon color="#606266" class="no-inherit">
-                <Sunny />
-              </el-icon>
-            </template>
-          </el-switch>
-        </nav>
+        <el-menu :default-active="activeIndex" class="el-menu-top" mode="horizontal" :ellipsis="false" router
+          @select="handleSelect">
+          <el-menu-item index="1" route="home">Home</el-menu-item>
+          <el-menu-item index="2" route="todos">Todos</el-menu-item>
+          <el-menu-item index="3" route="nav1">nav1</el-menu-item>
+          <el-menu-item index="4" route="nav2">nav2</el-menu-item>
+          <el-menu-item index="5">Home1</el-menu-item>
+          <div class="theme-toggler">
+            <el-switch v-model="currTheme" :active-action-icon="Moon" :inactive-action-icon="Sunny" @Change="toggleTheme">
+              <template #inactive-action>
+                <el-icon color="#606266">
+                  <Sunny />
+                </el-icon>
+              </template>
+            </el-switch>
+          </div>
+        </el-menu>
       </el-header>
       <el-main>
         <RouterView />
@@ -43,74 +47,20 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 手机端样式 */
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-  min-height: 20vh;
+.el-menu-item {
+  font-size: large;
 }
 
-.logo {
-  /* 显示为块级元素，前后带有空格 */
-  display: block;
-  margin: 0 auto 2rem;
+.theme-toggler {
+  display: flex;
+  align-items: center;
 }
 
-nav {
-  /* width: 100%; */
-  font-size: 1.5rem;
-  text-align: center;
-  /* margin-top: 2rem; */
+.el-menu-top {
+  background-color: transparent
 }
 
-
-/* 超链接激活状态颜色 */
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-
-/* 鼠标悬停超链接 */
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-
-/* 电脑端样式 */
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    /* padding-right: calc(var(--section-gap) / 2); */
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header.wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    /*导航条靠左*/
-    text-align: left;
-    font-size: 1.5rem;
-
-    padding: 1rem 0;
-    /* margin-top: 1rem; */
-  }
+.el-menu--horizontal>.el-menu-item:nth-child(5) {
+  margin-right: auto;
 }
 </style>

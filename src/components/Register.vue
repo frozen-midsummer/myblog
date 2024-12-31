@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
 import { login, register } from '@/api/backend'
-
 const store = useStore();
 const router = useRouter();
 
@@ -18,18 +17,13 @@ const registerForm = reactive({
 // 提交注册
 const submit = async () => {
     const response = await register({
-        username: registerForm.username,
-        password: registerForm.password
+        ...registerForm
     });
-    try {
-        await store.dispatch("theme/login", registerForm);
-        if (store.getters["theme/isLoggedIn"]) {
-            router.push("/home");
-        }
-    } catch (error) {
-        console.error("登录失败:", error.message);
-        ElMessage.error("登录失败，请重试");
+    await store.dispatch("token/login", registerForm);
+    if (store.getters["token/isLoggedIn"]) {
+        router.push("/home");
     }
+
 };
 </script>
 
