@@ -4,6 +4,7 @@ import { RouterLink, RouterView } from "vue-router";
 import { useStore } from "vuex";
 import { Sunny, Moon } from '@element-plus/icons-vue'
 import LightSwitchIcon from '@/components/icons/IconLightSwitch.vue'
+import GithubIcon from "./components/icons/GithubIcon.vue";
 const store = useStore();
 //获取当前主题
 const currTheme = ref(store.getters["theme/currentTheme"] === "dark")
@@ -29,14 +30,19 @@ onMounted(() => {
           <el-menu-item index="4" route="nav2">nav2</el-menu-item>
           <el-menu-item index="5">Home1</el-menu-item>
           <div class="theme-toggler">
-            <el-switch v-model="currTheme" :active-action-icon="Moon" :inactive-action-icon="Sunny" @Change="toggleTheme"
-              style="--el-switch-on-color:var(--el-border-color)">
+            <el-switch v-model="currTheme" :active-action-icon="Moon" :inactive-action-icon="Sunny" @Change="toggleTheme">
               <template #inactive-action>
                 <el-icon color="#606266">
                   <Sunny />
                 </el-icon>
               </template>
             </el-switch>
+          </div>
+          <div class="theme-toggler" style="width:1em"></div>
+          <div class="theme-toggler">
+            <a href="https://github.com/frozen-midsummer/myblog" title="GitHub" class="social-link">
+              <GithubIcon></GithubIcon>
+            </a>
           </div>
         </el-menu>
       </el-header>
@@ -48,6 +54,10 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.social-link {
+  margin-top: 5px;
+}
+
 .el-menu-item {
   font-size: large;
 }

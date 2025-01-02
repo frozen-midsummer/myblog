@@ -68,6 +68,7 @@ const onSubmit = async () => {
     fillForm(response.result)
   }
   else {
+    console.log(form.deadline)
     const response = await modifyTask(form)
     ElMessage({ message: "待办任务修改成功", type: 'success' });
     fillForm(response.result)
@@ -126,7 +127,7 @@ onMounted(() => {
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="default" @click="onSubmit">Sumit</el-button>
+            <el-button type="default" @click="onSubmit">Submit</el-button>
             <el-button type="default" @click="resetForm">Cancel</el-button>
           </el-form-item>
         </el-form>
