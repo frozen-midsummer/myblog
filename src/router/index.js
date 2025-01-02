@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import { validateToken } from "@/api/backend";
+import { validateToken } from "@/api/token";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

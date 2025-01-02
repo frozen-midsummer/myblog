@@ -1,5 +1,3 @@
-import { login } from "@/api/backend";
-
 const state = () => ({
   theme: "light",
 });

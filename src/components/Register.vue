@@ -3,7 +3,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
-import { login, register } from '@/api/backend'
+import { register } from '@/api/user'
 const store = useStore();
 const router = useRouter();
 

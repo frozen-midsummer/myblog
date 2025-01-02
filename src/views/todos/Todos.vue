@@ -3,17 +3,23 @@ import { ref, reactive, onMounted, onUpdated } from "vue";
 import { useStore } from 'vuex';
 import axios from "axios";
 import { formatDate } from '@/utils/date'
-import { findTasks, insertTask } from '@/api/usertasks'
+import { getTaskById, getTasks, insertTask, deleteTask, modifyTask } from '@/api/userdata'
 import { ElMessage } from "element-plus";
 const store = useStore();
 const todosData = ref([])
 const form = reactive({
+  taskId: '',
   description: '',
   deadline: '',
   alarm: ''
 })
 // 保存表单初始状态的一个快照
 const initialFormState = { ...form };
+//回填表单的方法
+const fillForm = (userTask) => {
+  const { taskId, description, deadline, alarm } = userTask
+  Object.assign(form, { taskId, description, deadline, alarm })
+}
 // 清空表单的方法
 const resetForm = () => {
   // 将表单恢复到初始状态
@@ -31,11 +37,23 @@ const alarmOptions = [
     label: 'Warning'
   },
 ]
-function deleteRow(index) {
-  todosData.value.splice(index, 1);
+async function editRow(scope) {
+  const response = await getTaskById({
+    taskId: scope.row.taskId
+  })
+  fillForm(response.result);
+  ElMessage({ message: "piupiu~~👉 fufu~~👆", type: 'success' });
+}
+async function deleteRow(scope) {
+  await deleteTask({
+    taskId: scope.row.taskId
+  })
+  todosData.value.splice(scope.$index, 1);
+  resetForm()
+  ElMessage({ message: "待办任务删除成功", type: 'success' });
 }
 async function refreshData() {
-  const response = await findTasks({});
+  const response = await getTasks({});
   todosData.value = response.result.map(todo => ({
     ...todo,
     createdTime: formatDate(todo.createdTime),
@@ -44,8 +62,16 @@ async function refreshData() {
   }));
 }
 const onSubmit = async () => {
-  const response = await insertTask(form);
-  ElMessage({ message: "待办任务提交成功", type: 'success' });
+  if (form.taskId === '') {
+    const response = await insertTask(form);
+    ElMessage({ message: "待办任务提交成功", type: 'success' });
+    fillForm(response.result)
+  }
+  else {
+    const response = await modifyTask(form)
+    ElMessage({ message: "待办任务修改成功", type: 'success' });
+    fillForm(response.result)
+  }
   refreshData();
 }
 onMounted(() => {
@@ -59,20 +85,25 @@ onMounted(() => {
       <el-col :span="17">
         <el-scrollbar class="scrollable-table">
           <el-button @click="refreshData">刷新数据</el-button>
-          <el-table :data="todosData">
-            <el-table-column prop="createdTime" label="Created Time" :width="160" />
-            <el-table-column prop="updatedTime" label="Updated Time" :width="160" />
-            <el-table-column prop="deadline" label="Deadline" :width="160" />
-            <el-table-column prop="description" label="Description" :width="210" />
-            <el-table-column prop="alarm" label="Notification" :width="120" />
-            <el-table-column fixed="right" label="" :width="120">
-              <template #default="scope">
-                <el-button type="info" size="default" @click.prevent="deleteRow(scope.$index)">
-                  Remove
-                </el-button>
-              </template>
-            </el-table-column>
-          </el-table>
+          <div style="max-width:970px">
+            <el-table :data="todosData" :max-height="500">
+              <el-table-column prop="createdTime" label="Created Time" :width="160" />
+              <el-table-column prop="updatedTime" label="Updated Time" :width="160" />
+              <el-table-column prop="deadline" label="Deadline" :width="160" />
+              <el-table-column prop="description" label="Description" :width="210" />
+              <el-table-column prop="alarm" label="Notification" :width="120" />
+              <el-table-column fixed="right" label="" :width="160">
+                <template #default="scope">
+                  <el-button type="info" size="default" @click.prevent="editRow(scope)">
+                    Edit
+                  </el-button>
+                  <el-button type="info" size="default" @click.prevent="deleteRow(scope)">
+                    Done
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
         </el-scrollbar>
       </el-col>
       <el-col :span="1">
@@ -80,6 +111,9 @@ onMounted(() => {
       </el-col>
       <el-col :span="6">
         <el-form :model="form" label-width="auto">
+          <el-form-item label="TaskId">
+            <el-input v-model="form.taskId" readonly />
+          </el-form-item>
           <el-form-item label="Deadline">
             <el-date-picker v-model="form.deadline" type="datetime" placeholder="Select date and time" />
           </el-form-item>

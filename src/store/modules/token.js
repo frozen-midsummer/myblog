@@ -1,4 +1,4 @@
-import { login } from "@/api/backend";
+import { login } from "@/api/token";
 
 const state = () => ({
   token: null,

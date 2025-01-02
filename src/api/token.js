@@ -1,16 +1,16 @@
 import request from "@/utils/request";
 
-export function findTasks(data) {
+export function login(data) {
   return request({
-    url: "/userdata/tasks",
+    url: "/token/login",
     method: "post",
     data,
   });
 }
 
-export function insertTask(data) {
+export function validateToken(data) {
   return request({
-    url: "/userdata/insertTask",
+    url: "/token/validateToken",
     method: "post",
     data,
   });

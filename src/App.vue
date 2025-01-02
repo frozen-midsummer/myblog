@@ -29,7 +29,8 @@ onMounted(() => {
           <el-menu-item index="4" route="nav2">nav2</el-menu-item>
           <el-menu-item index="5">Home1</el-menu-item>
           <div class="theme-toggler">
-            <el-switch v-model="currTheme" :active-action-icon="Moon" :inactive-action-icon="Sunny" @Change="toggleTheme">
+            <el-switch v-model="currTheme" :active-action-icon="Moon" :inactive-action-icon="Sunny" @Change="toggleTheme"
+              style="--el-switch-on-color:var(--el-border-color)">
               <template #inactive-action>
                 <el-icon color="#606266">
                   <Sunny />
