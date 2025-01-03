@@ -2,6 +2,48 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { MapLocation } from '@element-plus/icons-vue'
+let id = 0
+const cityCode = ref('')
+const props = {
+    lazy: true,
+    async lazyLoad(node, resolve) {
+        const { level } = node
+        if (level === 0) {
+            console.log(node)
+            const response = await axios.get('http://10.188.133.100:8080/weather/getAllProvince', {
+                params: {}
+            })
+            const nodes = response.data.result.map((item) => ({
+                value: item.adCode,
+                label: item.name,
+                leaf: false,
+            }))
+            resolve(nodes)
+        } else if (level === 1) {
+            console.log(node.data.value)
+            const response = await axios.get('http://10.188.133.100:8080/weather/getCityByProvince', {
+                params: { adCode: node.data.value.substring(0, 2) }
+            })
+            const nodes = response.data.result.map((item) => ({
+                value: item.adCode,
+                label: item.name,
+                leaf: item.adCode.substring(4, 6) !== '00',
+            }))
+            resolve(nodes)
+        } else if (level === 2) {
+            console.log(cityCode.value)
+            const response = await axios.get('http://10.188.133.100:8080/weather/getCountyByCity', {
+                params: { adCode: node.data.value.substring(0, 4) }
+            })
+            const nodes = response.data.result.map((item) => ({
+                value: item.adCode,
+                label: item.name,
+                leaf: true,
+            }))
+            resolve(nodes)
+        }
+    },
+}
 const weatherData = ref([])
 //杭州城市代码
 const cityAdcode = '330102'
@@ -20,6 +62,9 @@ async function queryWeather() {
 
 <template>
     <div>
+        <div>
+            <el-cascader v-model="cityCode" :props="props" />{{ cityCode }}
+        </div>
         <div style="display:flex;align-items: center;">
             <el-icon style="font-size:large">
                 <map-location />
