@@ -27,6 +27,12 @@ const router = createRouter({
       component: () => import("@/views/todos/Todos.vue"),
       meta: { requiresAuth: true },
     },
+    {
+      path: "/weather",
+      name: "weather",
+      component: () => import("@/views/weather/Weather.vue"),
+      meta: { requiresAuth: false },
+    },
   ],
 });
 

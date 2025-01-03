@@ -83,7 +83,7 @@ onMounted(() => {
 <template>
   <div>
     <el-row>
-      <el-col :span="17">
+      <el-col :span="16">
         <el-scrollbar class="scrollable-table">
           <el-button @click="refreshData">刷新数据</el-button>
           <div style="max-width:970px">
@@ -110,19 +110,20 @@ onMounted(() => {
       <el-col :span="1">
         <div class="todos-form-border"></div>
       </el-col>
-      <el-col :span="6">
-        <el-form :model="form" label-width="auto">
+      <el-col :span="7">
+        <el-form :model="form" label-width="auto" style="max-width: 305px;min-width: 300px">
           <el-form-item label="TaskId">
             <el-input v-model="form.taskId" readonly />
           </el-form-item>
           <el-form-item label="Deadline">
-            <el-date-picker v-model="form.deadline" type="datetime" placeholder="Select date and time" />
+            <el-date-picker v-model="form.deadline" type="datetime" placeholder="Select date and time"
+              time-format="HH:mm" />
           </el-form-item>
           <el-form-item label="Description">
             <el-input v-model="form.description" />
           </el-form-item>
           <el-form-item label="Alarm Level">
-            <el-select v-model="form.alarm" placeholder="Select alarm level" style="width: 240px">
+            <el-select v-model="form.alarm" placeholder="Select alarm level">
               <el-option v-for="item in alarmOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
