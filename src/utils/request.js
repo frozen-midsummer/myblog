@@ -56,8 +56,11 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     if (store.getters["token/getToken"]) {
-      config.headers.Authorization =
-        "Bearer " + store.getters["token/getToken"];
+      if (config.external) {
+      } else {
+        config.headers.Authorization =
+          "Bearer " + store.getters["token/getToken"];
+      }
     }
     //这里会过滤所有为空、0、false的key，如果不需要请自行注释
     // if (config.data)
@@ -90,7 +93,13 @@ instance.interceptors.response.use(
     // 清空正在运行的loading
     if (loadingInstance) loadingInstance.close();
     const { data, config } = response;
-    const { errorNo, errorInfo } = data;
+    let errorNo, errorInfo;
+    //后端服务链接
+    if (data.hasOwnProperty("errorNo")) {
+      ({ errorNo, errorInfo } = data);
+    } else if (data.hasOwnProperty("infocode")) {
+      ({ infocode: errorNo, info: errorInfo } = data);
+    }
     // 操作正常Code数组
     const codeVerificationArray = isArray(successCode)
       ? [...successCode]

@@ -1,41 +1,35 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
-import { MapLocation } from '@element-plus/icons-vue'
-let id = 0
+import { MapLocation, Clock } from '@element-plus/icons-vue'
+import { getAllProvince, getCityByProvince, getCountyByCity, getWeatherInfo } from '@/api/weather'
 const cityCode = ref('')
+const location = ref('天气定位')
+const reportTime = ref('报告时间')
 const props = {
     lazy: true,
+    emitPath: false,
     async lazyLoad(node, resolve) {
         const { level } = node
         if (level === 0) {
-            console.log(node)
-            const response = await axios.get('http://10.188.133.100:8080/weather/getAllProvince', {
-                params: {}
-            })
-            const nodes = response.data.result.map((item) => ({
+            const response = await getAllProvince();
+            const nodes = response.result.map((item) => ({
                 value: item.adCode,
                 label: item.name,
-                leaf: false,
+                leaf: item.adCode === '710000',
             }))
             resolve(nodes)
         } else if (level === 1) {
-            console.log(node.data.value)
-            const response = await axios.get('http://10.188.133.100:8080/weather/getCityByProvince', {
-                params: { adCode: node.data.value.substring(0, 2) }
-            })
-            const nodes = response.data.result.map((item) => ({
+            const response = await getCityByProvince({ adCode: node.data.value.substring(0, 2) })
+            const nodes = response.result.map((item) => ({
                 value: item.adCode,
                 label: item.name,
                 leaf: item.adCode.substring(4, 6) !== '00',
             }))
             resolve(nodes)
         } else if (level === 2) {
-            console.log(cityCode.value)
-            const response = await axios.get('http://10.188.133.100:8080/weather/getCountyByCity', {
-                params: { adCode: node.data.value.substring(0, 4) }
-            })
-            const nodes = response.data.result.map((item) => ({
+            const response = await getCountyByCity({ adCode: node.data.value.substring(0, 4) })
+            const nodes = response.result.map((item) => ({
                 value: item.adCode,
                 label: item.name,
                 leaf: true,
@@ -46,33 +40,44 @@ const props = {
 }
 const weatherData = ref([])
 //杭州城市代码
-const cityAdcode = '330102'
 async function queryWeather() {
-    const response = await axios.get('https://restapi.amap.com/v3/weather/weatherInfo', {
-        params: {
-            city: cityAdcode,
-            extensions: 'all',
-            key: '0affb83a73e4ee58a53273155355e6ea'
-        }
+    const response = await getWeatherInfo({
+        city: cityCode.value,
+        extensions: 'all',
+        key: '0affb83a73e4ee58a53273155355e6ea'
     })
-    console.log(response)
-    weatherData.value = response.data.forecasts.find(forecast => forecast.adcode === cityAdcode).casts
+    const result = response.forecasts.find(forecast => forecast.adcode === cityCode.value)
+    weatherData.value = result.casts
+    location.value = result.province + result.city
+    reportTime.value = result.reporttime
 }
 </script>
 
 <template>
     <div>
-        <div>
-            <el-cascader v-model="cityCode" :props="props" />{{ cityCode }}
-        </div>
-        <div style="display:flex;align-items: center;">
-            <el-icon style="font-size:large">
-                <map-location />
-            </el-icon>
-            <span style="margin-left:0.5em;margin-right:2em">浙江省-杭州市-上城区</span>
+        <el-row>
+            <el-cascader v-model="cityCode" :props="props" />
             <el-button @click="queryWeather">获取天气</el-button>
-        </div>
-        <div style="max-width:890px">
+        </el-row>
+        <el-row>
+            <el-col span="2">
+                <el-icon class="el-icon--left">
+                    <map-location />
+                </el-icon>
+            </el-col>
+            <el-col span="3">
+                {{ location }}
+            </el-col>
+            <el-col span="2">
+                <el-icon class="el-icon--left">
+                    <clock />
+                </el-icon>
+            </el-col>
+            <el-col span="3">
+                {{ reportTime }}
+            </el-col>
+        </el-row>
+        <el-row style="max-width:890px">
             <el-table :data="weatherData" :max-height="500">
                 <el-table-column prop="date" label="日期" :width="100" />
                 <el-table-column prop="week" label="星期X" :width="70" />
@@ -85,6 +90,16 @@ async function queryWeather() {
                 <el-table-column prop="daypower" label="白天风力" :width="80" />
                 <el-table-column prop="nightpower" label="晚上风力" :width="80" />
             </el-table>
-        </div>
+        </el-row>
     </div>
 </template>
+
+<style scoped>
+.el-row {
+    margin-bottom: 20px;
+}
+
+.el-row:last-child {
+    margin-bottom: 0;
+}
+</style>
