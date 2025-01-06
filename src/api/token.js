@@ -5,6 +5,7 @@ export function login(data) {
     url: "/token/login",
     method: "post",
     data,
+    withoutToken: true,
   });
 }
 

@@ -5,6 +5,9 @@ const cityCode = ref('')
 // 获取级联选择器实例
 const cascaderRef = ref(null);
 const emit = defineEmits(['onChanged'])
+defineProps({
+    placeholder: String,
+})
 const props = {
     lazy: true,
     emitPath: false,
@@ -44,6 +47,7 @@ const handleChange = (value) => {
 
 <template>
     <div>
-        <el-cascader v-model="cityCode" :props="props" @change="handleChange" ref="cascaderRef" />
+        <el-cascader v-model="cityCode" :props="props" @change="handleChange" ref="cascaderRef"
+            :placeholder="placeholder" />
     </div>
 </template>

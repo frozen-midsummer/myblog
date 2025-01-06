@@ -116,8 +116,7 @@ onMounted(() => {
             <el-input v-model="form.taskId" readonly />
           </el-form-item>
           <el-form-item label="Deadline">
-            <el-date-picker v-model="form.deadline" type="datetime" placeholder="Select date and time"
-              time-format="HH:mm" />
+            <el-date-picker v-model="form.deadline" type="datetime" placeholder="Select date and time" />
           </el-form-item>
           <el-form-item label="Description">
             <el-input v-model="form.description" />

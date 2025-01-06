@@ -4,6 +4,7 @@ export function getAllProvince() {
   return request({
     url: "/weather/getAllProvince",
     method: "get",
+    withoutToken: true,
   });
 }
 
@@ -12,6 +13,7 @@ export function getCityByProvince(params) {
     url: "/weather/getCityByProvince",
     method: "get",
     params,
+    withoutToken: true,
   });
 }
 
@@ -20,6 +22,7 @@ export function getCountyByCity(params) {
     url: "/weather/getCountyByCity",
     method: "get",
     params,
+    withoutToken: true,
   });
 }
 
@@ -28,6 +31,6 @@ export function getWeatherInfo(params) {
     url: "https://restapi.amap.com/v3/weather/weatherInfo",
     method: "get",
     params,
-    external: true,
+    withoutToken: true,
   });
 }

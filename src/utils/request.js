@@ -56,7 +56,7 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     if (store.getters["token/getToken"]) {
-      if (config.external) {
+      if (config.withoutToken) {
       } else {
         config.headers.Authorization =
           "Bearer " + store.getters["token/getToken"];

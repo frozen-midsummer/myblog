@@ -5,6 +5,7 @@ export function register(data) {
     url: "/user/register",
     method: "post",
     data,
+    withoutToken: true,
   });
 }
 

@@ -4,8 +4,8 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { getByUsername, modify } from '@/api/user';
 import ChinaCityCodeCascader from '@/components/ChinaCityCodeCascader.vue';
+import { ElMessage } from "element-plus";
 const store = useStore();
-const router = useRouter();
 const activeName = ref("baseInfo")
 const sexOptions = ref([
   {
@@ -31,6 +31,7 @@ const form = reactive({
   feelings: '',
   description: '',
 })
+const initialFormState = { ...form }
 onMounted(async () => {
   const response = await getByUsername({ username: store.getters["token/username"] })
   Object.assign(form, response.result)
@@ -38,6 +39,15 @@ onMounted(async () => {
 async function onSubmit() {
   const response = await modify(form)
   Object.assign(form, response.result)
+  ElMessage.success("个人信息修改成功")
+}
+function resetForm() {
+  Object.keys(initialFormState).forEach(key => {
+    form[key] = initialFormState[key];
+  });
+}
+const handleCitySelect = (cityCode, pathLabels) => {
+  form.location = pathLabels.join()
 }
 </script>
 
@@ -60,10 +70,11 @@ async function onSubmit() {
                 </el-select>
               </el-form-item>
               <el-form-item label="生日">
-                <el-date-picker v-model="form.birthday" type="date" :size="size" />
+                <el-date-picker v-model="form.birthday" type="date" />
               </el-form-item>
               <el-form-item label="地点">
-                <china-city-code-cascader @on-changed="handleCitySelect" placeholder="不修改不用选"></china-city-code-cascader>
+                <china-city-code-cascader @on-changed="handleCitySelect"
+                  :placeholder="form.location"></china-city-code-cascader>
               </el-form-item>
               <el-form-item label="</>">
                 <el-input v-model="form.skills"></el-input>
