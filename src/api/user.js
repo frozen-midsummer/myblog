@@ -7,3 +7,19 @@ export function register(data) {
     data,
   });
 }
+
+export function modify(data) {
+  return request({
+    url: "/user/modify",
+    method: "post",
+    data,
+  });
+}
+
+export function getByUsername(params) {
+  return request({
+    url: "/user/getByUsername",
+    method: "get",
+    params,
+  });
+}

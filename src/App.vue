@@ -28,41 +28,41 @@ onMounted(() => {
   <div>
     <el-container>
       <el-header>
-        <el-menu :default-active="activeIndex" class="el-menu-top" mode="horizontal" router :ellipsis="false"
+        <el-menu :default-active="activeIndex" class="el-menu-top" mode="horizontal" router :ellipsis="true"
           @select="handleSelect">
           <el-menu-item index="1" route="home">Home</el-menu-item>
           <el-menu-item index="2" route="todos">Todos</el-menu-item>
           <el-menu-item index="3" route="weather">Weather</el-menu-item>
           <el-menu-item index="4" route="nav2">nav2</el-menu-item>
           <el-menu-item index="5">Home1</el-menu-item>
-          <div class="theme-toggler">
+          <el-menu-item class="theme-toggler">
             <el-switch v-model="currTheme" @Change="toggleTheme"
               style="--el-switch-on-color:var(--bg-color-mute);--el-switch-border-color: var(--border-color)">
               <template #active-action>
-                <el-icon color="#2c2c2c">
+                <el-icon style="color:#2c2c2c;font-size:small;margin-left: 5px;">
                   <Moon />
                 </el-icon>
               </template>
               <template #inactive-action>
-                <el-icon color="#606266">
+                <el-icon style="color:#606266;font-size:small;margin-left: 5px;">
                   <Sunny />
                 </el-icon>
               </template>
             </el-switch>
-          </div>
-          <div class="github-link" style="width:1em"></div>
-          <div class="github-link">
+          </el-menu-item>
+          <el-menu-item class="github-link">
             <a href="https://github.com/frozen-midsummer/myblog" title="GitHub" class="social-link">
               <GithubIcon></GithubIcon>
             </a>
-          </div>
-          <div class="github-link" style="width:1em"></div>
+          </el-menu-item>
           <el-sub-menu>
-            <template #title><span style="font-size: large;">
+            <template #title>
+              <span style="font-size: large;">
                 <el-icon class="el-icon--left">
                   <user />
                 </el-icon>{{ store.getters["token/username"] }}
-              </span></template>
+              </span>
+            </template>
             <el-menu-item style="font-size: small;" @click="loginOut">
               <el-icon class="el-icon--left">
                 <switch-button />
@@ -81,7 +81,8 @@ onMounted(() => {
 
 <style scoped>
 .social-link {
-  margin-top: 0.2em;
+  display: flex;
+  align-items: center;
 }
 
 .social-link:hover {

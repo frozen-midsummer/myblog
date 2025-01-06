@@ -1,43 +1,11 @@
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 import { MapLocation, Clock } from '@element-plus/icons-vue'
-import { getAllProvince, getCityByProvince, getCountyByCity, getWeatherInfo } from '@/api/weather'
+import { getWeatherInfo } from '@/api/weather'
+import ChinaCityCodeCascader from '@/components/ChinaCityCodeCascader.vue';
 const cityCode = ref('')
 const location = ref('天气定位')
 const reportTime = ref('报告时间')
-const props = {
-    lazy: true,
-    emitPath: false,
-    async lazyLoad(node, resolve) {
-        const { level } = node
-        if (level === 0) {
-            const response = await getAllProvince();
-            const nodes = response.result.map((item) => ({
-                value: item.adCode,
-                label: item.name,
-                leaf: item.adCode === '710000',
-            }))
-            resolve(nodes)
-        } else if (level === 1) {
-            const response = await getCityByProvince({ adCode: node.data.value.substring(0, 2) })
-            const nodes = response.result.map((item) => ({
-                value: item.adCode,
-                label: item.name,
-                leaf: item.adCode.substring(4, 6) !== '00',
-            }))
-            resolve(nodes)
-        } else if (level === 2) {
-            const response = await getCountyByCity({ adCode: node.data.value.substring(0, 4) })
-            const nodes = response.result.map((item) => ({
-                value: item.adCode,
-                label: item.name,
-                leaf: true,
-            }))
-            resolve(nodes)
-        }
-    },
-}
 const weatherData = ref([])
 //杭州城市代码
 async function queryWeather() {
@@ -51,12 +19,15 @@ async function queryWeather() {
     location.value = result.province + result.city
     reportTime.value = result.reporttime
 }
+const handleCitySelect = (cityCode1, pathLabels) => {
+    cityCode.value = cityCode1
+}
 </script>
 
 <template>
     <div>
         <el-row>
-            <el-cascader v-model="cityCode" :props="props" />
+            <china-city-code-cascader @on-changed="handleCitySelect"></china-city-code-cascader>
             <el-button @click="queryWeather">获取天气</el-button>
         </el-row>
         <el-row>
