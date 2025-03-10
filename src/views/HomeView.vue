@@ -62,7 +62,7 @@ const handleCitySelect = (cityCode, pathLabels) => {
           <el-tab-pane label="基本信息" name="baseInfo">
             <el-form :model="form" label-width="auto" style="max-width: 305px;min-width: 300px">
               <el-form-item label="用户名">
-                <el-input v-model="form.username" />
+                <el-input v-model="form.username" readonly />
               </el-form-item>
               <el-form-item label="性别">
                 <el-select v-model="form.sex" placeholder="♂, ♀, ...">
@@ -78,6 +78,9 @@ const handleCitySelect = (cityCode, pathLabels) => {
               </el-form-item>
               <el-form-item label="</>">
                 <el-input v-model="form.skills"></el-input>
+              </el-form-item>
+              <el-form-item label="心情">
+                <el-input v-model="form.feelings"></el-input>
               </el-form-item>
               <el-form-item label="个人简介">
                 <el-input v-model="form.description" type="textarea" />

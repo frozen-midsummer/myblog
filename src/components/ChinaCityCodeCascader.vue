@@ -6,7 +6,10 @@ const cityCode = ref('')
 const cascaderRef = ref(null);
 const emit = defineEmits(['onChanged'])
 defineProps({
-    placeholder: String,
+    placeholder: {
+        type: String,
+        default: "请选择城市"
+    }
 })
 const props = {
     lazy: true,
