@@ -2,7 +2,7 @@ import request from "@/utils/request";
 
 export function login(data) {
   return request({
-    url: "/token/login",
+    url: "/userInfo/login",
     method: "post",
     data,
     withoutToken: true,
@@ -11,7 +11,7 @@ export function login(data) {
 
 export function validateToken(data) {
   return request({
-    url: "/token/validateToken",
+    url: "/userInfo/validateToken",
     method: "post",
     data,
   });

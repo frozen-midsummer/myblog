@@ -2,7 +2,7 @@ import request from "@/utils/request";
 
 export function getTaskById(data) {
   return request({
-    url: "/userdata/getTaskById",
+    url: "/userTask/getTaskById",
     method: "post",
     data,
   });
@@ -10,7 +10,7 @@ export function getTaskById(data) {
 
 export function getTasks(data) {
   return request({
-    url: "/userdata/getTasks",
+    url: "/userTask/getTasks",
     method: "post",
     data,
   });
@@ -18,7 +18,7 @@ export function getTasks(data) {
 
 export function insertTask(data) {
   return request({
-    url: "/userdata/insertTask",
+    url: "/userTask/insertTask",
     method: "post",
     data,
   });
@@ -26,7 +26,7 @@ export function insertTask(data) {
 
 export function deleteTask(data) {
   return request({
-    url: "/userdata/deleteTask",
+    url: "/userTask/deleteTask",
     method: "post",
     data,
   });
@@ -34,7 +34,7 @@ export function deleteTask(data) {
 
 export function modifyTask(data) {
   return request({
-    url: "/userdata/modifyTask",
+    url: "/userTask/modifyTask",
     method: "post",
     data,
   });

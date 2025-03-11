@@ -2,7 +2,7 @@ import request from "@/utils/request";
 
 export function register(data) {
   return request({
-    url: "/user/register",
+    url: "/userInfo/register",
     method: "post",
     data,
     withoutToken: true,
@@ -11,7 +11,7 @@ export function register(data) {
 
 export function modify(data) {
   return request({
-    url: "/user/modify",
+    url: "/userInfo/modify",
     method: "post",
     data,
   });
@@ -19,8 +19,8 @@ export function modify(data) {
 
 export function getByUsername(params) {
   return request({
-    url: "/user/getByUsername",
-    method: "get",
+    url: "/userInfo/getUserInfo",
+    method: "post",
     params,
   });
 }
