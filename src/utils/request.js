@@ -1,4 +1,4 @@
-import ElementPlus, { ElMessage } from "element-plus";
+import { ElMessage, ElLoading } from "element-plus";
 import axios from "axios";
 import configs from "@/config";
 import store from "@/store";
@@ -6,41 +6,40 @@ import qs from "qs";
 import router from "@/router";
 import { isArray } from "@/utils/validate";
 
-// 使用解构赋值来简化对 config 属性的访问
 const {
   baseURL,
   contentType,
-  debounce,
+  debounce = [], // 默认为空数组
   invalidCode,
-  loginInterception,
   noPermissionCode,
   requestTimeout,
   successCode,
-  tokenName,
 } = configs;
 
 let loadingInstance;
 
 /**
- * @author
- * @description 处理code异常
- * @param {*} code
- * @param {*} msg
+ * 处理异常码
+ * @param {number|string} code 
+ * @param {string} msg 
  */
 const handleCode = (code, msg) => {
   switch (code) {
     case invalidCode:
-      ElMessage(msg || `后端接口${code}异常`);
-      store.dispatch("user/resetAccessToken").catch(() => {});
-      if (loginInterception) {
-        location.reload();
-      }
+      ElMessage.error(msg || "登录已过期，请重新登录");
+      store.dispatch("token/logout");
+      // 重定向到登录页，并带上当前页面路径，以便登录后跳转回来
+      router.push({
+        path: "/login",
+        query: { redirect: router.currentRoute.value.fullPath },
+      }).catch(() => {});
       break;
     case noPermissionCode:
       router.push({ path: "/401" }).catch(() => {});
+      ElMessage.error(msg || "您没有权限访问此资源");
       break;
     default:
-      ElMessage(msg || `后端接口${code}异常`);
+      ElMessage.error(msg || `后端接口异常 code:${code}`);
       break;
   }
 };
@@ -55,32 +54,30 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   (config) => {
-    if (store.getters["token/getToken"]) {
-      if (config.withoutToken) {
-      } else {
-        config.headers.Authorization =
-          "Bearer " + store.getters["token/getToken"];
+    const token = store.getters["token/getToken"];
+    if (token) {
+      if (!config.withoutToken) {
+        config.headers.Authorization = "Bearer " + token;
       }
     }
-    //这里会过滤所有为空、0、false的key，如果不需要请自行注释
-    // if (config.data)
-    //   config.data = Vue.prototype.$baseLodash.pickBy(
-    //     config.data,
-    //     Vue.prototype.$baseLodash.identity
-    //   );
+
+    // 处理 POST 请求的数据格式
     if (
       config.data &&
       config.headers["Content-Type"] ===
         "application/x-www-form-urlencoded;charset=UTF-8"
-    )
+    ) {
       config.data = qs.stringify(config.data);
-    //防抖，不需要请自行注释
-    if (debounce.some((item) => config.url.includes(item)))
+    }
+
+    // 防抖与 Loading 处理
+    if (debounce.some((item) => config.url.includes(item))) {
       loadingInstance = ElLoading.service({
         lock: true,
-        text: "Loading",
-        // background: "rgba(0, 0, 0, 0.7)",
+        text: "Loading...",
+        background: "rgba(0, 0, 0, 0.7)",
       });
+    }
     return config;
   },
   (error) => {
@@ -90,56 +87,57 @@ instance.interceptors.request.use(
 
 instance.interceptors.response.use(
   (response) => {
-    // 清空正在运行的loading
     if (loadingInstance) loadingInstance.close();
+    
     const { data, config } = response;
-    let errorNo, errorInfo;
-    //后端服务链接
+    // 兼容不同的后端返回结构
+    // 假设标准结构为 { code, msg, data/result } 或 { errorNo, errorInfo, ... }
+    
+    let code = data.code;
+    let msg = data.msg || data.message;
+
+    // 适配原有逻辑
     if (data.hasOwnProperty("errorNo")) {
-      ({ errorNo, errorInfo } = data);
+      code = data.errorNo;
+      msg = data.errorInfo;
     } else if (data.hasOwnProperty("infocode")) {
-      ({ infocode: errorNo, info: errorInfo } = data);
+      code = data.infocode;
+      msg = data.info;
     }
-    // 操作正常Code数组
+
+    // 成功状态码判断
     const codeVerificationArray = isArray(successCode)
-      ? [...successCode]
-      : [...[successCode]];
-    // 是否操作正常
-    if (codeVerificationArray.includes(errorNo)) {
+      ? successCode
+      : [successCode];
+
+    if (codeVerificationArray.includes(code) || codeVerificationArray.includes(String(code))) {
       return data;
     } else {
-      handleCode(errorNo, errorInfo);
+      handleCode(code, msg);
       return Promise.reject(
-        `请求异常拦截:${JSON.stringify({
-          url: config.url,
-          errorNo,
-          errorInfo,
-        })}` || "Error"
+        new Error(`请求异常: ${msg || "Unknown Error"} (Code: ${code})`)
       );
     }
   },
   (error) => {
     if (loadingInstance) loadingInstance.close();
-    const { response, message } = error;
-    if (error.response && error.response.data) {
-      const { status, data } = response;
-      handleCode(status, data.msg || message);
-      return Promise.reject(error);
+    
+    let { message, response } = error;
+    
+    if (response && response.data) {
+        const { status, data } = response;
+        handleCode(status, data.msg || message || "Request Failed");
     } else {
-      let { message } = error;
-      if (message === "Network Error") {
-        message = "后端接口连接异常";
-      }
-      if (message.includes("timeout")) {
-        message = "后端接口请求超时";
-      }
-      if (message.includes("Request failed with status code")) {
-        const code = message.substr(message.length - 3);
-        message = `后端接口${code}异常`;
-      }
-      ElMessage(message || `后端接口未知异常`);
-      return Promise.reject(error);
+        if (message === "Network Error") {
+            message = "后端接口连接异常";
+        } else if (message.includes("timeout")) {
+            message = "后端接口请求超时";
+        } else if (message.includes("Request failed with status code")) {
+            message = `后端接口${message.substr(message.length - 3)}异常`;
+        }
+        ElMessage.error(message || "后端接口未知异常");
     }
+    return Promise.reject(error);
   }
 );
 

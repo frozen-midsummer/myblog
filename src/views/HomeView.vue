@@ -1,26 +1,21 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
 import { getByUsername, modify } from '@/api/user';
 import ChinaCityCodeCascader from '@/components/ChinaCityCodeCascader.vue';
 import { ElMessage } from "element-plus";
+import { User, Calendar, Location, MagicStick, ChatDotRound, Edit } from '@element-plus/icons-vue';
+
 const store = useStore();
 const activeName = ref("baseInfo")
-const sexOptions = ref([
-  {
-    value: 'M',
-    label: '男'
-  },
-  {
-    value: 'F',
-    label: '女'
-  },
-  {
-    value: 'O',
-    label: '其他'
-  },
-])
+const loading = ref(false);
+
+const sexOptions = [
+  { value: 'M', label: '男' },
+  { value: 'F', label: '女' },
+  { value: 'O', label: '其他' },
+];
+
 const form = reactive({
   id: '',
   username: '',
@@ -31,68 +26,235 @@ const form = reactive({
   feelings: '',
   description: '',
 })
-const initialFormState = { ...form }
+
+// 用于重置的数据备份
+let initialData = {};
+
 onMounted(async () => {
-  const response = await getByUsername({ username: store.getters["token/username"] })
-  Object.assign(form, response.result)
+  await fetchData();
 })
+
+async function fetchData() {
+  loading.value = true;
+  try {
+    const username = store.getters["token/username"];
+    if (!username) return;
+    
+    const response = await getByUsername({ username });
+    if (response && response.result) {
+      Object.assign(form, response.result);
+      // 保存初始数据用于重置
+      initialData = JSON.parse(JSON.stringify(response.result));
+    }
+  } catch (error) {
+    console.error("Failed to fetch user info:", error);
+  } finally {
+    loading.value = false;
+  }
+}
+
 async function onSubmit() {
-  const response = await modify(form)
-  Object.assign(form, response.result)
-  ElMessage.success("个人信息修改成功")
+  loading.value = true;
+  try {
+    const response = await modify(form)
+    if (response && response.result) {
+      Object.assign(form, response.result);
+      initialData = JSON.parse(JSON.stringify(response.result));
+      ElMessage.success("个人信息修改成功")
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
 }
+
 function resetForm() {
-  Object.keys(initialFormState).forEach(key => {
-    form[key] = initialFormState[key];
-  });
+  if (initialData.username) {
+    Object.assign(form, initialData);
+    ElMessage.info("已重置为上次保存的状态");
+  } else {
+    // 如果没有初始数据，清空非只读字段
+    form.sex = '';
+    form.birthday = '';
+    form.location = '';
+    form.skills = '';
+    form.feelings = '';
+    form.description = '';
+  }
 }
+
 const handleCitySelect = (cityCode, pathLabels) => {
-  form.location = pathLabels.join()
+  form.location = pathLabels.join('/')
 }
 </script>
 
 <template>
-  <div>
-    <el-row>
-      <el-col :span="12">
-        <div style="font-size: large;">{{ store.getters["token/username"] }}</div>
+  <div class="home-container" v-loading="loading">
+    <el-row :gutter="20">
+      <!-- 左侧个人简介卡片 -->
+      <el-col :xs="24" :sm="8" :md="6">
+        <el-card class="profile-card">
+          <div class="profile-header">
+            <el-avatar :size="100" class="profile-avatar">
+              {{ form.username ? form.username.charAt(0).toUpperCase() : 'U' }}
+            </el-avatar>
+            <h2 class="username">{{ form.username || '未登录' }}</h2>
+            <p class="description">{{ form.description || '这个人很懒，什么都没有写...' }}</p>
+          </div>
+          <div class="profile-details">
+            <div class="detail-item" v-if="form.location">
+              <el-icon><Location /></el-icon>
+              <span>{{ form.location }}</span>
+            </div>
+            <div class="detail-item" v-if="form.birthday">
+              <el-icon><Calendar /></el-icon>
+              <span>{{ form.birthday }}</span>
+            </div>
+          </div>
+        </el-card>
       </el-col>
-      <el-col :span="12">
-        <el-tabs v-model="activeName" class="personal-info-tabs">
-          <el-tab-pane label="基本信息" name="baseInfo">
-            <el-form :model="form" label-width="auto" style="max-width: 305px;min-width: 300px">
-              <el-form-item label="用户名">
-                <el-input v-model="form.username" readonly />
-              </el-form-item>
-              <el-form-item label="性别">
-                <el-select v-model="form.sex" placeholder="♂, ♀, ...">
-                  <el-option v-for="item in sexOptions" :key="item.value" :label="item.label" :value="item.value" />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="生日">
-                <el-date-picker v-model="form.birthday" type="date" />
-              </el-form-item>
-              <el-form-item label="地点">
-                <china-city-code-cascader @on-changed="handleCitySelect"
-                  :placeholder="form.location"></china-city-code-cascader>
-              </el-form-item>
-              <el-form-item label="</>">
-                <el-input v-model="form.skills"></el-input>
-              </el-form-item>
-              <el-form-item label="心情">
-                <el-input v-model="form.feelings"></el-input>
-              </el-form-item>
-              <el-form-item label="个人简介">
-                <el-input v-model="form.description" type="textarea" />
-              </el-form-item>
-              <el-form-item>
-                <el-button type="default" @click="onSubmit">保存</el-button>
-                <el-button type="default" @click="resetForm">清空</el-button>
-              </el-form-item>
-            </el-form>
-          </el-tab-pane>
-        </el-tabs>
+
+      <!-- 右侧编辑表单 -->
+      <el-col :xs="24" :sm="16" :md="18">
+        <el-card class="edit-card">
+          <template #header>
+            <div class="card-header">
+              <span>个人资料设置</span>
+            </div>
+          </template>
+          
+          <el-tabs v-model="activeName">
+            <el-tab-pane label="基本信息" name="baseInfo">
+              <el-form :model="form" label-width="80px" class="user-form">
+                <el-form-item label="用户名">
+                  <el-input v-model="form.username" readonly disabled>
+                    <template #prefix>
+                      <el-icon><User /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
+                
+                <el-form-item label="性别">
+                  <el-select v-model="form.sex" placeholder="请选择性别" style="width: 100%;">
+                    <el-option v-for="item in sexOptions" :key="item.value" :label="item.label" :value="item.value" />
+                  </el-select>
+                </el-form-item>
+                
+                <el-form-item label="生日">
+                  <el-date-picker 
+                    v-model="form.birthday" 
+                    type="date" 
+                    placeholder="选择日期" 
+                    style="width: 100%;"
+                    value-format="YYYY-MM-DD"
+                  />
+                </el-form-item>
+                
+                <el-form-item label="所在地">
+                  <china-city-code-cascader 
+                    @on-changed="handleCitySelect"
+                    :placeholder="form.location || '请选择城市'"
+                    style="width: 100%;"
+                  ></china-city-code-cascader>
+                </el-form-item>
+                
+                <el-form-item label="技能栈">
+                  <el-input v-model="form.skills" placeholder="例如: Vue, Java, Spring Boot">
+                    <template #prefix>
+                      <el-icon><MagicStick /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
+                
+                <el-form-item label="心情状态">
+                  <el-input v-model="form.feelings" placeholder="今天心情怎么样？">
+                    <template #prefix>
+                      <el-icon><ChatDotRound /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
+                
+                <el-form-item label="个人简介">
+                  <el-input 
+                    v-model="form.description" 
+                    type="textarea" 
+                    :rows="4" 
+                    placeholder="介绍一下你自己..." 
+                  />
+                </el-form-item>
+                
+                <el-form-item>
+                  <el-button type="primary" @click="onSubmit" :icon="Edit">保存修改</el-button>
+                  <el-button @click="resetForm">重置</el-button>
+                </el-form-item>
+              </el-form>
+            </el-tab-pane>
+            
+            <el-tab-pane label="账号安全" name="security" disabled>
+              <!-- 预留 -->
+              <el-empty description="暂未开放" />
+            </el-tab-pane>
+          </el-tabs>
+        </el-card>
       </el-col>
     </el-row>
   </div>
 </template>
+
+<style scoped lang="scss">
+.home-container {
+  padding: 10px;
+}
+
+.profile-card {
+  margin-bottom: 20px;
+  text-align: center;
+  
+  .profile-avatar {
+    background-color: var(--el-color-primary);
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+  
+  .username {
+    margin: 10px 0;
+    font-size: 1.5rem;
+    color: var(--text-color);
+  }
+  
+  .description {
+    color: var(--el-text-color-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+}
+
+.profile-details {
+  text-align: left;
+  border-top: 1px solid var(--el-border-color-light);
+  padding-top: 15px;
+  
+  .detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: var(--el-text-color-regular);
+    
+    .el-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.edit-card {
+  .card-header {
+    font-weight: bold;
+  }
+}
+
+.user-form {
+  max-width: 600px;
+}
+</style>

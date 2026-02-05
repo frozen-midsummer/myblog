@@ -1,10 +1,14 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import { validateToken } from "@/api/token";
+import store from "@/store";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: "/",
+      redirect: "/home",
+    },
     {
       path: "/home",
       name: "home",
@@ -15,11 +19,13 @@ const router = createRouter({
       path: "/login",
       name: "login",
       component: () => import("@/components/Login.vue"),
+      meta: { guest: true }, // 仅游客访问
     },
     {
       path: "/register",
       name: "register",
       component: () => import("@/components/Register.vue"),
+      meta: { guest: true },
     },
     {
       path: "/todos",
@@ -33,42 +39,28 @@ const router = createRouter({
       component: () => import("@/views/weather/Weather.vue"),
       meta: { requiresAuth: false },
     },
+    {
+      path: "/:pathMatch(.*)*",
+      redirect: "/home",
+    },
   ],
 });
 
 // 路由拦截
-router.beforeEach(async (to, from, next) => {
-  // 如果目标路由是登录页面，则直接放行
-  if (to.path === "/login") {
-    return next();
+router.beforeEach((to, from, next) => {
+  const token = store.getters["token/getToken"] || localStorage.getItem("token");
+
+  // 如果已登录且访问登录/注册页，重定向到首页
+  if (to.meta.guest && token) {
+    return next({ path: "/home" });
   }
-  const requiresAuth = to.meta.requiresAuth;
-  // 检查是否需要认证以及用户是否已登录
-  const isUserLoggedIn =
-    localStorage.getItem("token") && localStorage.getItem("username");
-  if (requiresAuth && !isUserLoggedIn) {
+
+  // 检查是否需要认证
+  if (to.meta.requiresAuth && !token) {
     // 如果需要认证且用户未登录，则重定向到登录页面
     next({ path: "/login", query: { redirect: to.fullPath } });
-  } else if (requiresAuth && isUserLoggedIn) {
-    try {
-      // 验证令牌
-      const response = await validateToken({
-        username: localStorage.getItem("username"),
-      });
-      if (response.errorNo === 0) {
-        // 如果令牌验证成功，则允许继续导航
-        next();
-      } else {
-        // 如果令牌验证失败，可以选择重定向到登录或其他处理逻辑
-        next({ path: "/login", query: { redirect: to.fullPath } });
-      }
-    } catch (error) {
-      // 处理验证过程中可能发生的错误（如网络问题）
-      console.error("Token validation failed:", error);
-      next({ path: "/login", query: { redirect: to.fullPath } });
-    }
   } else {
-    // 如果不需要认证，则直接放行
+    // 否则直接放行
     next();
   }
 });
