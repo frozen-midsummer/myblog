@@ -42,9 +42,13 @@ fi
 # 启动新进程
 echo "Starting new process..."
 
-# 加载环境变量（如果有 .env 文件）
+# 加载环境变量（优先加载 .env 文件，如果存在）
 if [ -f ".env" ]; then
-    export $(cat .env | xargs)
+    echo "Loading environment variables from .env..."
+    # 使用 set -a 自动导出所有定义的变量
+    set -a
+    source .env
+    set +a
 fi
 
 # 启动命令：
