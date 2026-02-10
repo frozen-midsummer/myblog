@@ -1,84 +1,21 @@
-/* color palette from <https://github.com/vuejs/theme> */
-:root {
-  --vt-c-white: #ffffff;
-  --vt-c-white-soft: #f8f8f8;
-  --vt-c-white-mute: #f2f2f2;
-
-  --vt-c-black: #181818;
-  --vt-c-black-soft: #222222;
-  --vt-c-black-mute: #282828;
-
-  --vt-c-indigo: #2c3e50;
-
-  --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
-  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
-  --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
-  --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
-
-  --vt-c-text-light-1: var(--vt-c-indigo);
-  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
-  --vt-c-text-dark-1: var(--vt-c-white);
-  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
-
-  --vt-c-background-opacity-light: 0.4;
-  --vt-c-background-opacity-dark: 0.15;
-
-  --el-table-border-color-light: var(--vt-c-black-soft);
-  --el-table-border-color-dark: var(--vt-c-white-soft);
-
-  --el-table-header-text-color-light: #2c3e50;
-  --el-table-header-text-color-dark: #ff0080;
-}
-
 /* semantic color variables for this project */
 :root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
+  --color-background: var(--bg-color);
+  --color-background-soft: var(--bg-color);
+  --color-background-mute: var(--bg-color-mute);
 
-  --color-border: var(--vt-c-divider-light-2);
-  --color-border-hover: var(--vt-c-divider-light-1);
+  --color-border: var(--border-color);
+  --color-border-hover: var(--el-color-primary);
 
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
+  --color-heading: var(--text-color);
+  --color-text: var(--text-color);
 
-  --background-opacity: var(--vt-c-background-opacity-light);
-  --el-table-border-color1: var(--el-table-border-color-light);
-  --el-table-header-text-color1: var(--el-table-header-text-color-light);
-
+  --background-opacity: 0.15;
   --section-gap: 160px;
 }
 
-/* 侦测操作系统主题色 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
-
-    --color-border: var(--vt-c-divider-dark-2);
-    --color-border-hover: var(--vt-c-divider-dark-1);
-
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-2);
-  }
-}
-
-/* 深色模式 */
-.dark {
-  --color-background: var(--vt-c-black);
-  --color-background-soft: var(--vt-c-black-soft);
-  --color-background-mute: var(--vt-c-black-mute);
-
-  --color-border: var(--vt-c-divider-dark-2);
-  --color-border-hover: var(--vt-c-divider-dark-1);
-
-  --color-heading: var(--vt-c-text-dark-1);
-  --color-text: var(--vt-c-text-dark-2);
-
-  --background-opacity: var(--vt-c-background-opacity-dark);
-  --el-table-border-color1: var(--el-table-border-color-dark);
-  --el-table-header-text-color1: var(--el-table-header-text-color-dark);
+html.dark {
+  --background-opacity: 0.05;
 }
 
 *,
@@ -94,23 +31,9 @@ body {
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);
-  transition:
-    color 0.5s,
-    background-color 0.5s;
+  transition: color 0.5s, background-color 0.5s;
   line-height: 1.6;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   font-size: 15px;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -122,32 +45,33 @@ body::before {
   position: absolute;
   content: "";
   display: block;
-  /* width: 100%;
-  height: 100%; */
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
   opacity: var(--background-opacity);
   z-index: -1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
 }
 
-/* element plus variables */
-:root .el-table {
-  background-color: transparent;
-  --el-table-border-color: var(--el-table-border-color1);
-  --el-table-header-text-color: var(--el-table-header-text-color1);
+/* element plus variables integration */
+:root {
+  --el-bg-color: var(--bg-color);
+  --el-bg-color-page: var(--bg-color-mute);
+  --el-text-color-primary: var(--text-color);
+  --el-text-color-regular: var(--text-color-secondary);
+  --el-border-color: var(--border-color);
 }
 
-/* 使element plus 表格透明化 */
-:root .el-table tr {
-  background-color: transparent;
+.el-table {
+  background-color: transparent !important;
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
 }
 
-:root .el-table th.el-table__cell {
-  background-color: transparent;
-}
-
-:root .el-table--fit {
-  padding: 1px 0px 0px 0px;
+.el-table tr, .el-table th.el-table__cell, .el-table td.el-table__cell {
+  background-color: transparent !important;
 }

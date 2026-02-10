@@ -1,65 +1,134 @@
 <script setup>
 import { ref } from 'vue'
-import { MapLocation, Clock } from '@element-plus/icons-vue'
-import { getWeatherInfo } from '@/api/weather'
+import { MapLocation, Clock, Location } from '@element-plus/icons-vue'
+import { getWeatherInfo, getIpLocation } from '@/api/weather'
 import ChinaCityCodeCascader from '@/components/ChinaCityCodeCascader.vue';
+import { ElMessage } from 'element-plus'
+
 const cityCode = ref('')
 const location = ref('天气定位')
 const reportTime = ref('报告时间')
 const weatherData = ref([])
+const loading = ref(false)
+
 //杭州城市代码
 async function queryWeather() {
-    const response = await getWeatherInfo({
-        city: cityCode.value,
-        extensions: 'all',
-        key: '0affb83a73e4ee58a53273155355e6ea'
-    })
-    const result = response.forecasts.find(forecast => forecast.adcode === cityCode.value)
-    weatherData.value = result.casts
-    location.value = result.province + result.city
-    reportTime.value = result.reporttime
+    if (!cityCode.value) {
+        ElMessage.warning('请先选择城市')
+        return
+    }
+    loading.value = true
+    try {
+        const response = await getWeatherInfo({
+            city: cityCode.value,
+            extensions: 'all'
+        })
+        const result = response.result.forecasts.find(forecast => forecast.adcode === cityCode.value)
+        if (result) {
+            weatherData.value = result.casts
+            location.value = result.province + result.city
+            reportTime.value = result.reporttime
+        } else {
+            ElMessage.error('未获取到该城市的天气信息')
+        }
+    } catch (error) {
+        console.error(error)
+        ElMessage.error('获取天气信息失败')
+    } finally {
+        loading.value = false
+    }
 }
+
+async function autoLocation() {
+    loading.value = true
+    try {
+        const response = await getIpLocation()
+        if (response.result.status === '1' && response.result.adcode && typeof response.result.adcode === 'string') {
+            cityCode.value = response.result.adcode
+            ElMessage.success(`自动定位成功：${response.result.city || '未知城市'}`)
+            await queryWeather()
+            loading.value = false
+        } else {
+            console.warn('IP location failed or returned no adcode, trying browser geolocation...')
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    () => {
+                        ElMessage.warning('无法通过 IP 识别精确城市，请手动选择')
+                        loading.value = false
+                    },
+                    (error) => {
+                        console.error('Geolocation error:', error)
+                        ElMessage.error('自动定位失败，请手动选择城市')
+                        loading.value = false
+                    },
+                    { timeout: 5000 }
+                )
+            } else {
+                ElMessage.error('自动定位失败，请手动选择城市')
+                loading.value = false
+            }
+        }
+    } catch (error) {
+        console.error(error)
+        ElMessage.error('自动定位服务不可用')
+        loading.value = false
+    }
+}
+
 const handleCitySelect = (cityCode1, pathLabels) => {
     cityCode.value = cityCode1
 }
 </script>
 
 <template>
-    <div>
-        <el-row>
-            <china-city-code-cascader @on-changed="handleCitySelect"></china-city-code-cascader>
-            <el-button @click="queryWeather">获取天气</el-button>
-        </el-row>
-        <el-row>
-            <el-col span="2">
-                <el-icon class="el-icon--left">
-                    <map-location />
-                </el-icon>
+    <div v-loading="loading">
+        <el-row :gutter="20">
+            <el-col :xs="24" :sm="8" :md="6">
+                <china-city-code-cascader v-model="cityCode" @on-changed="handleCitySelect"
+                    style="width: 100%"></china-city-code-cascader>
             </el-col>
-            <el-col span="3">
-                {{ location }}
-            </el-col>
-            <el-col span="2">
-                <el-icon class="el-icon--left">
-                    <clock />
-                </el-icon>
-            </el-col>
-            <el-col span="3">
-                {{ reportTime }}
+            <el-col :xs="24" :sm="16" :md="18" class="button-container">
+                <el-button-group>
+                    <el-button type="primary" :icon="Location" @click="autoLocation">自动定位</el-button>
+                    <el-button type="success" @click="queryWeather">获取天气</el-button>
+                </el-button-group>
             </el-col>
         </el-row>
-        <el-row style="max-width:890px">
-            <el-table :data="weatherData" :max-height="500">
-                <el-table-column prop="date" label="日期" :width="100" />
-                <el-table-column prop="week" label="星期X" :width="70" />
-                <el-table-column prop="dayweather" label="白天天气现象" :width="120" />
-                <el-table-column prop="nightweather" label="晚上天气现象" :width="120" />
-                <el-table-column prop="daytemp_float" label="白天温度" :width="80" />
-                <el-table-column prop="nighttemp_float" label="晚上温度" :width="80" />
-                <el-table-column prop="daywind" label="白天风向" :width="80" />
-                <el-table-column prop="nightwind" label="晚上风向" :width="80" />
-                <el-table-column prop="daypower" label="白天风力" :width="80" />
-                <el-table-column prop="nightpower" label="晚上风力" :width="80" />
+        <el-row class="info-row">
+            <el-col :span="24" class="info-content">
+                <div class="info-item">
+                    <el-icon><map-location /></el-icon>
+                    <span>{{ location }}</span>
+                </div>
+                <div class="info-item">
+                    <el-icon><clock /></el-icon>
+                    <span>{{ reportTime }}</span>
+                </div>
+            </el-col>
+        </el-row>
+        <el-row class="table-row">
+            <el-table :data="weatherData" border style="width: 100%">
+                <el-table-column prop="date" label="日期" min-width="100" />
+                <el-table-column prop="week" label="星期" min-width="70">
+                    <template #default="scope">
+                        星期{{ scope.row.week }}
+                    </template>
+                </el-table-column>
+                <el-table-column label="白/晚天气" min-width="150">
+                    <template #default="scope">
+                        {{ scope.row.dayweather }} / {{ scope.row.nightweather }}
+                    </template>
+                </el-table-column>
+                <el-table-column label="温度" min-width="100">
+                    <template #default="scope">
+                        {{ scope.row.daytemp_float }}℃ / {{ scope.row.nighttemp_float }}℃
+                    </template>
+                </el-table-column>
+                <el-table-column label="风力风向" min-width="150" class-name="hidden-xs-only">
+                    <template #default="scope">
+                        {{ scope.row.daywind }}{{ scope.row.daypower }}级
+                    </template>
+                </el-table-column>
             </el-table>
         </el-row>
     </div>
@@ -72,5 +141,55 @@ const handleCitySelect = (cityCode1, pathLabels) => {
 
 .el-row:last-child {
     margin-bottom: 0;
+}
+
+.button-container {
+    display: flex;
+    align-items: center;
+}
+
+.info-row {
+    background-color: var(--bg-color-mute);
+    padding: 10px 15px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.info-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-color-secondary);
+}
+
+.info-item .el-icon {
+    font-size: 18px;
+    color: #409eff;
+}
+
+.table-row {
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .button-container {
+        margin-top: 10px;
+        justify-content: flex-start;
+    }
+    
+    .info-content {
+        gap: 10px;
+    }
+    
+    .info-item {
+        width: 100%;
+    }
 }
 </style>

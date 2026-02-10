@@ -1,16 +1,27 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { getAllProvince, getCityByProvince, getCountyByCity } from '@/api/weather'
-const cityCode = ref('')
-// 获取级联选择器实例
-const cascaderRef = ref(null);
-const emit = defineEmits(['onChanged'])
-defineProps({
+
+const props1 = defineProps({
     placeholder: {
         type: String,
         default: "请选择城市"
+    },
+    modelValue: {
+        type: String,
+        default: ""
     }
 })
+
+const cityCode = ref(props1.modelValue)
+
+watch(() => props1.modelValue, (newVal) => {
+    cityCode.value = newVal
+})
+
+// 获取级联选择器实例
+const cascaderRef = ref(null);
+const emit = defineEmits(['onChanged', 'update:modelValue'])
 const props = {
     lazy: true,
     emitPath: false,
@@ -44,6 +55,7 @@ const props = {
     },
 }
 const handleChange = (value) => {
+    emit('update:modelValue', value)
     emit('onChanged', value, cascaderRef.value.cascaderPanelRef.checkedNodes[0].pathLabels)
 };
 </script>

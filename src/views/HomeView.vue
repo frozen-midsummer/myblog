@@ -54,12 +54,32 @@ async function fetchData() {
 }
 
 async function onSubmit() {
+  if (!form.username || form.username.trim().length < 3) {
+    ElMessage.warning("用户名长度不能少于 3 个字符");
+    return;
+  }
+  
   loading.value = true;
   try {
+    const isUsernameChanged = form.username !== initialData.username;
     const response = await modify(form)
     if (response && response.result) {
-      Object.assign(form, response.result);
-      initialData = JSON.parse(JSON.stringify(response.result));
+      const newUserInfo = response.result;
+      Object.assign(form, newUserInfo);
+      initialData = JSON.parse(JSON.stringify(newUserInfo));
+      
+      // 如果修改了用户名，需要更新 store 和 localStorage 中的信息
+      if (isUsernameChanged) {
+        store.commit("token/SET_USERNAME", newUserInfo.username);
+        localStorage.setItem("username", newUserInfo.username);
+        
+        // 如果返回了新 token，更新它
+        if (newUserInfo.token) {
+          store.commit("token/SET_TOKEN", newUserInfo.token);
+          localStorage.setItem("token", newUserInfo.token);
+        }
+      }
+      
       ElMessage.success("个人信息修改成功")
     }
   } catch (error) {
@@ -128,7 +148,7 @@ const handleCitySelect = (cityCode, pathLabels) => {
             <el-tab-pane label="基本信息" name="baseInfo">
               <el-form :model="form" label-width="80px" class="user-form">
                 <el-form-item label="用户名">
-                  <el-input v-model="form.username" readonly disabled>
+                  <el-input v-model="form.username" placeholder="请输入用户名">
                     <template #prefix>
                       <el-icon><User /></el-icon>
                     </template>
@@ -233,7 +253,7 @@ const handleCitySelect = (cityCode, pathLabels) => {
 
 .profile-details {
   text-align: left;
-  border-top: 1px solid var(--el-border-color-light);
+  border-top: 1px solid var(--border-color);
   padding-top: 15px;
   
   .detail-item {
@@ -256,5 +276,45 @@ const handleCitySelect = (cityCode, pathLabels) => {
 
 .user-form {
   max-width: 600px;
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 10px;
+    padding-bottom: 60px; /* 增加底部留白 */
+    overflow: visible !important;
+  }
+  
+  :deep(.el-tabs__content) {
+    overflow: visible !important;
+  }
+  
+  :deep(.el-tab-pane) {
+    overflow: visible !important;
+  }
+  
+  .profile-card {
+    margin-bottom: 15px;
+    
+    .profile-avatar {
+      width: 80px !important;
+      height: 80px !important;
+      font-size: 1.5rem;
+    }
+    
+    .username {
+      font-size: 1.2rem;
+    }
+  }
+  
+  .edit-card {
+    :deep(.el-card__body) {
+      padding: 15px;
+    }
+    
+    :deep(.el-form-item) {
+      margin-bottom: 15px;
+    }
+  }
 }
 </style>

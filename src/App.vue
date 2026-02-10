@@ -2,7 +2,7 @@
 import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { Sunny, Moon, ArrowDown, User, SwitchButton } from '@element-plus/icons-vue'
+import { Sunny, Moon, ArrowDown, User, SwitchButton, House, List, Cloudy } from '@element-plus/icons-vue'
 import GithubIcon from "./components/icons/GithubIcon.vue";
 
 const store = useStore();
@@ -19,6 +19,12 @@ const isDark = computed({
 });
 
 const username = computed(() => store.getters["token/username"]);
+
+const navItems = [
+  { index: 'home', route: '/home', label: 'Home', icon: House },
+  { index: 'todos', route: '/todos', label: 'Todos', icon: List },
+  { index: 'weather', route: '/weather', label: 'Weather', icon: Cloudy },
+]
 
 function handleLogout() {
   store.dispatch("token/logout");
@@ -48,9 +54,10 @@ onMounted(() => {
           :ellipsis="false"
           router
         >
-          <el-menu-item index="home" route="/home">Home</el-menu-item>
-          <el-menu-item index="todos" route="/todos">Todos</el-menu-item>
-          <el-menu-item index="weather" route="/weather">Weather</el-menu-item>
+          <el-menu-item v-for="item in navItems" :key="item.index" :index="item.index" :route="item.route">
+            <el-icon class="nav-icon"><component :is="item.icon" /></el-icon>
+            <span class="nav-text">{{ item.label }}</span>
+          </el-menu-item>
         </el-menu>
 
         <div class="header-right">
@@ -65,15 +72,17 @@ onMounted(() => {
           />
 
           <!-- Github Link -->
-          <a href="https://github.com/frozen-midsummer/myblog" target="_blank" class="social-link" title="GitHub">
+          <a href="https://github.com/frozen-midsummer/myblog" target="_blank" class="social-link github-link" title="GitHub">
             <GithubIcon class="icon-svg" />
           </a>
 
           <!-- User Profile -->
           <el-dropdown v-if="username" trigger="click">
             <span class="user-info">
-              <el-icon class="el-icon--left"><User /></el-icon>
-              {{ username }}
+              <el-avatar :size="28" class="user-avatar">
+                {{ username.charAt(0).toUpperCase() }}
+              </el-avatar>
+              <span class="username-text">{{ username }}</span>
               <el-icon class="el-icon--right"><ArrowDown /></el-icon>
             </span>
             <template #dropdown>
@@ -112,8 +121,8 @@ onMounted(() => {
 .app-header {
   padding: 0;
   height: var(--header-height, 60px);
-  background-color: var(--bg-color, #fff);
-  border-bottom: 1px solid var(--el-border-color-light, #e4e7ed);
+  background-color: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -136,17 +145,26 @@ onMounted(() => {
   display: flex;
   align-items: center;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .nav-menu {
   border-bottom: none !important;
   flex: 1;
   background: transparent;
+  min-width: 0;
   
   :deep(.el-menu-item) {
     background: transparent !important;
+    padding: 0 15px;
+    
     &:hover {
       color: var(--el-color-primary);
+    }
+    
+    .nav-icon {
+      margin-right: 4px;
+      display: none;
     }
   }
 }
@@ -155,12 +173,83 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 20px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .app-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: auto !important;
+    min-height: 100vh;
+  }
+
+  .app-header {
+    .header-content {
+      padding: 0 10px;
+    }
+  }
+  
+  .logo {
+    margin-right: 10px;
+    font-size: 1.2rem;
+  }
+  
+  .nav-menu {
+    :deep(.el-menu-item) {
+      padding: 0 10px;
+      
+      .nav-text {
+        display: none;
+      }
+      
+      .nav-icon {
+        display: inline-flex;
+        margin-right: 0;
+        font-size: 18px;
+      }
+    }
+  }
+  
+  .header-right {
+    gap: 8px;
+    
+    .github-link {
+      display: none;
+    }
+    
+    .theme-switch {
+      margin-right: 0;
+    }
+    
+    .user-info {
+      .username-text {
+        display: none;
+      }
+      
+      .el-icon--right {
+        display: none;
+      }
+      
+      .user-avatar {
+        margin-right: 0;
+      }
+    }
+  }
+
+  .app-main {
+    padding: 12px;
+    display: block;
+    overflow: visible;
+    flex: none;
+    height: auto !important;
+  }
 }
 
 .social-link {
   display: flex;
   align-items: center;
-  color: var(--text-color, #333);
+  color: var(--text-color);
   transition: color 0.3s;
   
   &:hover {
@@ -172,20 +261,29 @@ onMounted(() => {
   cursor: pointer;
   display: flex;
   align-items: center;
-  color: var(--text-color, #333);
+  color: var(--text-color);
   outline: none;
+  gap: 8px;
   
   &:hover {
     color: var(--el-color-primary);
+  }
+
+  .user-avatar {
+    background-color: var(--el-color-primary);
+    color: #fff;
+    font-size: 14px;
+    flex-shrink: 0;
   }
 }
 
 .app-main {
   padding: 20px;
-  background-color: var(--bg-color-mute, #f5f7fa);
+  background-color: var(--bg-color-mute);
   flex: 1;
   display: flex;
   justify-content: center;
+  overflow: visible;
   
   > * {
     width: 100%;

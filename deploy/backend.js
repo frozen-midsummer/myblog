@@ -31,7 +31,9 @@ const config = {
   // 后端构建产物路径
   localJarPath: path.resolve(process.cwd(), '../myblog-ddd/myblog-ddd-starter/target/myblog-ddd-starter-1.0-SNAPSHOT.jar'),
   // 启动脚本路径
-  startScriptPath: path.resolve(__dirname, 'start.sh')
+  startScriptPath: path.resolve(__dirname, 'start.sh'),
+  // 环境变量文件路径
+  localEnvPath: path.resolve(process.cwd(), '../myblog-ddd/.env')
 };
 
 async function validateConfig() {
@@ -82,7 +84,24 @@ async function remoteBuildAndDeploy() {
       await sftp.mkdir(remoteSrcDir, true);
     }
     await sftp.uploadDir(localSrcDir, remoteSrcDir);
-    spinner.succeed(chalk.green('后端源码已上传'));
+    
+    // 上传 .env 文件到远程目录
+    if (fs.existsSync(config.localEnvPath)) {
+      await sftp.put(config.localEnvPath, `${config.remotePath}/.env`);
+    }
+
+    // 上传启动脚本
+    await sftp.put(config.startScriptPath, `${config.remotePath}/start.sh`);
+    await sftp.chmod(`${config.remotePath}/start.sh`, 0o755);
+
+    // 上传构建好的 JAR 包
+    const localJarPath = path.resolve(process.cwd(), '../myblog-ddd/myblog-ddd-starter/target/myblog-ddd-starter-1.0-SNAPSHOT.jar');
+    if (fs.existsSync(localJarPath)) {
+      await sftp.put(localJarPath, `${config.remotePath}/app.jar`);
+      spinner.succeed(chalk.green('后端源码、.env、启动脚本及 JAR 包已上传'));
+    } else {
+      spinner.succeed(chalk.green('后端源码、.env 及启动脚本已上传 (JAR 包未找到，将尝试远程构建)'));
+    }
   } catch (e) {
     spinner.fail(chalk.red('上传源码失败'));
     throw e;
@@ -92,7 +111,7 @@ async function remoteBuildAndDeploy() {
 
   const { Client: SSHClient } = await import('ssh2');
   const conn = new SSHClient();
-  const sshSpinner = ora('正在服务器上执行 Maven 构建...').start();
+  const sshSpinner = ora('正在处理远程部署...').start();
   const buildCmd = `cd ${remoteSrcDir} && mvn -DskipTests clean package`;
   const copyCmd = `cp ${remoteSrcDir}/myblog-ddd-starter/target/myblog-ddd-starter-1.0-SNAPSHOT.jar ${config.remotePath}/app.jar`;
   const startCmd = `bash ${config.remotePath}/start.sh`;
@@ -111,41 +130,49 @@ async function remoteBuildAndDeploy() {
   return new Promise((resolve, reject) => {
     conn.on('ready', async () => {
       try {
-        // 安装 Java 和 Maven（如果缺失）
-        const checkMvn = `command -v mvn >/dev/null 2>&1 || echo "NO_MAVEN"`;
-        const checkJava = `command -v java >/dev/null 2>&1 || echo "NO_JAVA"`;
-        const installCmd = `
-          if ! command -v mvn >/dev/null 2>&1 || ! command -v java >/dev/null 2>&1; then
-            if [ -f /etc/os-release ]; then
-              . /etc/os-release
-              if [ "$ID" = "ubuntu" ] || [ "$ID" = "debian" ]; then
-                sudo apt-get update -y && sudo apt-get install -y openjdk-17-jdk maven
-              elif [ "$ID" = "centos" ] || [ "$ID" = "rhel" ]; then
-                sudo yum install -y java-17-openjdk java-17-openjdk-devel maven
-              elif [ "$ID" = "fedora" ] || [ "$ID" = "rocky" ] || [ "$ID" = "almalinux" ]; then
-                sudo dnf install -y java-17-openjdk java-17-openjdk-devel maven
-              else
-                echo "UNKNOWN_OS"
-              fi
-            else
-              echo "UNKNOWN_OS"
-            fi
-          fi
-        `;
-        await execRemote(conn, checkMvn);
-        await execRemote(conn, checkJava);
-        await execRemote(conn, installCmd);
+        // 检查 JAR 是否已上传
+        const checkJar = `[ -f ${config.remotePath}/app.jar ] && echo "JAR_EXISTS" || echo "JAR_MISSING"`;
+        let jarExists = false;
+        await new Promise((res) => {
+          conn.exec(checkJar, (err, stream) => {
+            stream.on('data', (data) => {
+              if (data.toString().includes('JAR_EXISTS')) jarExists = true;
+            }).on('close', () => res());
+          });
+        });
 
-        await execRemote(conn, buildCmd);
-        sshSpinner.succeed(chalk.green('远程构建完成'));
-        const stepSpinner = ora('复制并启动服务...').start();
-        await execRemote(conn, copyCmd);
+        if (!jarExists) {
+          sshSpinner.text = '未检测到 JAR 包，正在尝试远程 Maven 构建...';
+          // 安装 Java 和 Maven（如果缺失）
+          const installCmd = `
+            if ! command -v mvn >/dev/null 2>&1 || ! command -v java >/dev/null 2>&1; then
+              if [ -f /etc/os-release ]; then
+                . /etc/os-release
+                if [ "$ID" = "ubuntu" ] || [ "$ID" = "debian" ]; then
+                  sudo apt-get update -y && sudo apt-get install -y openjdk-17-jdk maven
+                elif [ "$ID" = "centos" ] || [ "$ID" = "rhel" ]; then
+                  sudo yum install -y java-17-openjdk java-17-openjdk-devel maven
+                elif [ "$ID" = "fedora" ] || [ "$ID" = "rocky" ] || [ "$ID" = "almalinux" ]; then
+                  sudo dnf install -y java-17-openjdk java-17-openjdk-devel maven
+                fi
+              fi
+            fi
+          `;
+          await execRemote(conn, installCmd);
+          await execRemote(conn, buildCmd);
+          await execRemote(conn, copyCmd);
+          sshSpinner.succeed(chalk.green('远程构建并复制完成'));
+        } else {
+          sshSpinner.succeed(chalk.green('检测到已上传的 JAR 包，跳过远程构建'));
+        }
+
+        const stepSpinner = ora('正在启动服务...').start();
         await execRemote(conn, startCmd);
         stepSpinner.succeed(chalk.green('服务已启动'));
         conn.end();
         resolve();
       } catch (err) {
-        sshSpinner.fail(chalk.red('远程构建或启动失败'));
+        sshSpinner.fail(chalk.red('远程部署或启动失败'));
         conn.end();
         reject(err);
       }
@@ -160,13 +187,43 @@ async function remoteBuildAndDeploy() {
 }
 function parseDbConfig() {
   const ymlPath = path.resolve(process.cwd(), '../myblog-ddd/myblog-ddd-starter/src/main/resources/application.yml');
+  const envPath = path.resolve(process.cwd(), '../myblog-ddd/.env');
   const content = fs.readFileSync(ymlPath, 'utf-8');
-  const urlLine = content.match(/url:\s*(?:\$\{[^:]+:)?([^}\n\r]+)\}?/);
-  const userLine = content.match(/username:\s*(?:\$\{[^:]+:)?([^}\n\r]+)\}?/);
-  const passLine = content.match(/password:\s*(?:\$\{[^:]+:)?([^}\n\r]+)\}?/);
-  const url = urlLine ? urlLine[1].trim() : '';
-  const username = userLine ? userLine[1].trim() : '';
-  const password = passLine ? passLine[1].trim() : '';
+  
+  // 提取变量名
+  const getVarName = (line) => {
+    const m = line.match(/\$\{([^}]+)\}/);
+    return m ? m[1] : null;
+  };
+
+  const urlLine = content.match(/url:\s*(.*)/);
+  const userLine = content.match(/username:\s*(.*)/);
+  const passLine = content.match(/password:\s*(.*)/);
+
+  let url = urlLine ? urlLine[1].trim() : '';
+  let username = userLine ? userLine[1].trim() : '';
+  let password = passLine ? passLine[1].trim() : '';
+
+  // 如果是环境变量占位符，从 .env 文件读取
+  if (url.startsWith('${')) {
+    const envContent = fs.readFileSync(envPath, 'utf-8');
+    const varName = getVarName(url);
+    const envMatch = envContent.match(new RegExp(`${varName}=(.*)`));
+    if (envMatch) url = envMatch[1].trim();
+  }
+  if (username.startsWith('${')) {
+    const envContent = fs.readFileSync(envPath, 'utf-8');
+    const varName = getVarName(username);
+    const envMatch = envContent.match(new RegExp(`${varName}=(.*)`));
+    if (envMatch) username = envMatch[1].trim();
+  }
+  if (password.startsWith('${')) {
+    const envContent = fs.readFileSync(envPath, 'utf-8');
+    const varName = getVarName(password);
+    const envMatch = envContent.match(new RegExp(`${varName}=(.*)`));
+    if (envMatch) password = envMatch[1].trim();
+  }
+
   const m = url.match(/jdbc:mysql:\/\/([^:\/]+)(?::(\d+))?\/([^?\s]+)/);
   const host = m ? m[1] : 'localhost';
   const port = m && m[2] ? m[2] : '3306';
@@ -307,37 +364,20 @@ async function deploy() {
     await sftp.chmod(`${config.remotePath}/start.sh`, 0o755);
     spinner.succeed(chalk.green('启动脚本上传成功'));
 
-    // 4. 重启服务
+    // 4. 上传 .env 文件
+    if (fs.existsSync(config.localEnvPath)) {
+      spinner.start('正在上传 .env 文件...');
+      await sftp.put(config.localEnvPath, `${config.remotePath}/.env`);
+      spinner.succeed(chalk.green('.env 文件上传成功'));
+    } else {
+      console.log(chalk.yellow('⚠️ 未找到 .env 文件，跳过上传'));
+    }
+
+    // 5. 重启服务
     spinner.start('正在重启后端服务...');
-    // 使用 nohup 运行脚本，并将其输出重定向到 /dev/null 或日志文件
-    // 注意：ssh 执行命令时如果不妥善处理后台进程，连接可能会 hang 住
-    // 这里的 start.sh 内部应该处理好 nohup
-    const startCmd = `bash ${config.remotePath}/start.sh`;
     
-    // 我们通过 sftp 对应的 ssh client 来执行命令，或者 sftp-client 没有 exec 方法？
-    // ssh2-sftp-client 主要是 sftp。我们需要用 ssh2 或者 ssh2-sftp-client 暴露的 client。
-    // ssh2-sftp-client 不直接提供 exec。但我们可以通过 client 属性访问底层 ssh2 client？
-    // 不，最好是再建立一个 ssh 连接，或者使用 exec 库在本地执行 ssh 命令（如果本地有 ssh）。
-    // 为了稳健，我们使用 ssh2 库（ssh2-sftp-client 依赖它，但不一定暴露）。
-    // 实际上 ssh2-sftp-client 只是 sftp 封装。
-    // 这里简单起见，如果 ssh2-sftp-client 不支持 exec，我们得另辟蹊径。
-    // 既然我们有密码/key，可以用 ssh2 库。
-    // 检查 package.json，我们只装了 ssh2-sftp-client。
-    // ssh2-sftp-client 内部使用了 ssh2。
-    // 我们可以直接 import { Client as SSHClient } from 'ssh2'; 但这需要单独安装 ssh2 (虽然它是 sftp 的依赖，但最好显式安装)。
-    // 为了不引入新依赖，我们尝试用 ssh2-sftp-client 的扩展性？
-    // 查阅文档，ssh2-sftp-client 主要是文件操作。
-    // 我们需要一个能执行命令的库。
-    // 既然刚才已经成功安装了 ssh2-sftp-client，它依赖 ssh2。
-    // 我们可以尝试动态 import ssh2。
-    
-    // 为了简单，我们提示用户手动重启，或者我们使用 child_process 调用系统的 ssh 命令（假设用户装了 git bash 或 wsl）。
-    // 但用户是 Windows。
-    // 让我们尝试用 ssh2-sftp-client 的 client 属性（如果有）。
-    // 否则，我们添加 ssh2 依赖？
-    // 其实，我们可以用 sftp 上传一个 "trigger" 文件？不，太复杂。
-    
-    // 让我们使用 `ssh2` 库。它应该已经在 node_modules 里了。
+    // 我们在 finally 之后处理重启逻辑，所以这里先标记上传阶段完成
+    spinner.succeed(chalk.green('所有部署文件上传成功'));
   } catch (err) {
     spinner.fail(chalk.red('部署过程中出错'));
     console.error(err);
@@ -345,39 +385,39 @@ async function deploy() {
     await sftp.end();
   }
   
-  // 重新建立 SSH 连接执行命令
   const { Client: SSHClient } = await import('ssh2');
   const conn = new SSHClient();
   
-  const sshSpinner = ora('正在执行远程重启命令...').start();
+  const sshSpinner = ora('正在建立 SSH 连接执行重启指令...').start();
   
   return new Promise((resolve, reject) => {
     conn.on('ready', () => {
-        // 传递环境变量给启动脚本
-        // 注意：这里假设 .env.deploy.local 里的变量也需要传给后端？
-        // 通常后端配置在 application.yml 里已经用 ${ENV} 占位。
-        // 我们可以在 start.sh 里 source 一个 env 文件，或者在命令行传入。
-        // 为了安全和灵活，我们将 .env.deploy.local 中的 DB_*, REDIS_* 变量拼接成 export 语句写入一个 .env 文件上传到服务器
-        // 然后在 start.sh 中 source 它。
-        
+        sshSpinner.text = '正在执行远程重启脚本...';
         const cmd = `bash ${config.remotePath}/start.sh`;
         
         conn.exec(cmd, (err, stream) => {
             if (err) {
-                sshSpinner.fail('执行命令失败');
+                sshSpinner.fail('执行重启命令失败');
                 conn.end();
                 reject(err);
                 return;
             }
             stream.on('close', (code, signal) => {
-                sshSpinner.text = `命令执行完毕，退出码: ${code}`;
-                sshSpinner.succeed(chalk.green('后端服务重启指令已发送'));
+                if (code === 0) {
+                  sshSpinner.succeed(chalk.green('后端服务已成功启动'));
+                } else {
+                  sshSpinner.fail(chalk.red(`重启脚本执行失败，退出码: ${code}`));
+                }
                 conn.end();
                 resolve();
             }).on('data', (data) => {
-                console.log('STDOUT: ' + data);
+                const msg = data.toString().trim();
+                if (msg) {
+                  sshSpinner.text = `[远程输出] ${msg}`;
+                  console.log(chalk.gray(`STDOUT: ${msg}`));
+                }
             }).stderr.on('data', (data) => {
-                console.log('STDERR: ' + data);
+                console.log(chalk.yellow('STDERR: ' + data));
             });
         });
     }).on('error', (err) => {

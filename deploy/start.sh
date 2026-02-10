@@ -45,10 +45,14 @@ echo "Starting new process..."
 # 加载环境变量（优先加载 .env 文件，如果存在）
 if [ -f ".env" ]; then
     echo "Loading environment variables from .env..."
-    # 使用 set -a 自动导出所有定义的变量
-    set -a
-    source .env
-    set +a
+    # 过滤掉注释和空行，并确保每一行都是合法的 export 格式
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        # 忽略注释和空行
+        [[ "$line" =~ ^#.*$ ]] && continue
+        [[ -z "$line" ]] && continue
+        # 导出变量
+        export "$line"
+    done < .env
 fi
 
 # 启动命令：

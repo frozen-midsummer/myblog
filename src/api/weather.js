@@ -28,9 +28,17 @@ export function getCountyByCity(params) {
 
 export function getWeatherInfo(params) {
   return request({
-    url: "https://restapi.amap.com/v3/weather/weatherInfo",
+    url: "/weather/weatherInfo",
     method: "get",
     params,
+    withoutToken: true,
+  });
+}
+
+export function getIpLocation() {
+  return request({
+    url: "/weather/getIpLocation",
+    method: "get",
     withoutToken: true,
   });
 }

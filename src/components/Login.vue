@@ -132,6 +132,10 @@ onMounted(() => {
   background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
 }
 
+html.dark .login-wrapper {
+  background-image: linear-gradient(120deg, #1e3c72 0%, #2a5298 100%);
+}
+
 .login-box {
   width: 100%;
   max-width: 400px;

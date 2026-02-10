@@ -1,12 +1,22 @@
 :root {
   --el-color-primary: #409eff;
   --bg-color: #ffffff;
-  --bg-color-mute: #f2f2f2;
+  --bg-color-mute: #f5f7fa;
   --text-color: #2c3e50;
+  --text-color-secondary: #606266;
+  --border-color: #e4e7ed;
   --header-height: 60px;
 }
 
+html.dark {
+  --bg-color: #1d1e1f;
+  --bg-color-mute: #141414;
+  --text-color: #cfd3dc;
+  --text-color-secondary: #a8abb2;
+  --border-color: #4c4d4f;
+}
+
 $primary-color: #409eff;
-$text-color: #2c3e50;
-$bg-color: #ffffff;
-$bg-color-mute: #f2f2f2;
+$text-color: var(--text-color);
+$bg-color: var(--bg-color);
+$bg-color-mute: var(--bg-color-mute);
